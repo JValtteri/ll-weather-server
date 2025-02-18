@@ -13,7 +13,11 @@ Intended to be dockerized
 - Seamless update of data, but cached data for lighting fast initial response
 - Expand day previews to show detailed forecast for the day
 - Search for cities within Finland
-- Cloud and Humidity data
+- Show at a glance
+  - Temperature
+  - Total cloud % 
+  - Humidity data
+  - Wind direction and speed
 - Location in URL for easy bookmarking
 - Dockerized
-- (multiple sources?)
+- (uses multiple data sources?)
