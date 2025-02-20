@@ -21,7 +21,9 @@ func apiUp(w http.ResponseWriter, request *http.Request) {
 func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     var city string
     city = request.URL.Query().Get("name")
-    fmt.Fprintf(w, "Requested: [%s]", city)
+    r_obj := getSummaryWeather(city)
+    w.Header().Set("Content-Type", "application/json")
+    fmt.Fprintf(w, unloadJSON(r_obj))
 }
 
 func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
