@@ -72,7 +72,7 @@ func str_f(f float32) string {
     return s
 }
 
-func unloadJSON(object InWeatherRange) string {
+func unloadJSON(object any) string {
     body, err := json.Marshal(object)
     if err != nil {
         fmt.Println(err)

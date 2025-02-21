@@ -14,5 +14,4 @@ func main() {
 func printAttribution() {
     fmt.Println("Data Sources:")
     fmt.Println("https://openweathermap.org/api")
-    fmt.Println("https://www.meteoblue.com/en/weather/outdoorsports/seeing/")
 }

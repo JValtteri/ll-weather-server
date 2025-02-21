@@ -19,18 +19,17 @@ type InWeatherRange struct {
             Lon float32
         }
     }
-    List []InWeatherDay
+    List []InWeather
 }
 
  // Weather Data //
 
-type InWeatherDay struct {
-    Dt float64
-    Visibility int
+type InWeather struct {
+    Dt uint
+    Visibility uint
     Main struct {
         Temp float32
         Humidity float32
-        Icon string
     }
     Weather []struct {
         Main string
@@ -38,7 +37,11 @@ type InWeatherDay struct {
         Icon string
     }
     Clouds struct {
-        All int
+        All uint
+    }
+    Wind struct {
+        Speed float32
+        Deg int
     }
 }
 
