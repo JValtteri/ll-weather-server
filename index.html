@@ -12,10 +12,11 @@
 
     <form id="city">
         <input type="text" id="city-name" name="city-name">
-        <button type="button" id="submitButton">Submit</button>
+        <button type="button" id="submit-button">Submit</button>
     </form>
+    <button type="button" id="day-night" disabled>DAY</button>
     <br>
-    <table>
+    <table id="days-forecast">
         <tr>
             <th></th><th>1.</th><th>2.</th><th>3.</th><th>4.</th><th>5.</th>
         </tr>
@@ -23,19 +24,19 @@
             <td></td><td></td><td></td><td></td><td></td><td></td>
         </tr>
         <tr>
-            <td>Temp C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td>
+            <td>Temp C</td><td></td><td></td><td></td><td></td><td></td>
         </tr>
         <tr>
-            <td>Humi %</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td>
+            <td>Humi %</td><td></td><td></td><td></td><td></td><td></td>
         </tr>
         <tr>
-            <td>Cloud %</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td>
+            <td>Cloud %</td><td></td><td></td><td></td><td></td><td></td>
         </tr>
     </table>
 
-    <h3>Day</h3>
+    <h3 hidden>Day</h3>
 
-    <table>
+    <table id="hours-forecast" hidden>
         <tr>
             <th></th><th>00:00</th><th>03:00</th><th>06:00</th><th>09:00</th><th>12:00</th><th>15:00</th><th>18:00</th><th>21:00</th>
         </tr>
@@ -43,13 +44,13 @@
             <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
         </tr>
         <tr>
-            <td>Temp C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td>
+            <td>Temp C</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
         </tr>
         <tr>
-            <td>Humi %</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td>
+            <td>Humi %</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
         </tr>
         <tr>
-            <td>Cloud %</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td><td>%</td>
+            <td>Cloud %</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
         </tr>
     </table>
 

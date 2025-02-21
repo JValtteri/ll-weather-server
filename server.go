@@ -6,6 +6,8 @@ import (
     "log"
 )
 
+const ORIGIN_URL string = "http://localhost:8000"
+
 func server() {
     fmt.Println("Server UP")
     http.HandleFunc("/", apiUp)
@@ -22,6 +24,7 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     var city string
     city = request.URL.Query().Get("name")
     r_obj := getSummaryWeather(city)
+    setCorrs(w)
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprintf(w, unloadJSON(r_obj))
 }
@@ -30,4 +33,10 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     var city string
     city = request.URL.Query().Get("name")
     fmt.Fprintf(w, "Detail Requested: [%s]", city)
+}
+
+func setCorrs(w http.ResponseWriter) {
+    w.Header().Set("Access-Control-Allow-Origin", ORIGIN_URL)
+    w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
+    w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 }

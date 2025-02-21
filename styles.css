@@ -28,8 +28,7 @@ tr:nth-child(odd) {
 }
 
 th {
-  background-color: #2f9f50;
-  color: #101010;
+  background-color: #309050;
 }
 
 input {
@@ -41,9 +40,14 @@ input {
 }
 
 button {
-  color: #101010;
-  background-color: #2f9f50;
+  background-color: #2e9f50;
+  color: #f0f0f0;
   border-radius: 6px;
   padding: 5px;
+}
 
+button:disabled,
+button[disabled] {
+  color: #252525;
+  background-color: #606060;
 }

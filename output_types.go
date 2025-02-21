@@ -52,7 +52,7 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
     // 0 3 6 9 12 15 18 21 (24)
     var week WeekWeather
     var time uint = 0
-    days := make([]DayWeather, (6))
+    days := make([]DayWeather, 5, 7)
 
     var i int = 0
     var day_no int = 0
