@@ -44,15 +44,23 @@ func getCity(name string) (float32, float32) {
     fmt.Println("Get city:", name)
     requestURL := makeCityURL(name, COUNTRY, CITY_LIMIT)
     fmt.Println(requestURL)
-
-    raw_city := makeRequest(requestURL)
-    err := json.Unmarshal(raw_city, &city_obj)
-    if err != nil {
-        fmt.Println("JSON Marshal error:", err)
-    }
+    var raw_city []byte = makeRequest(requestURL)
+    unmarshalCity(raw_city, &city_obj)
     if len(city_obj) == 0 {
         return 0.0, 0.0
     }
+    var lat, lon float32 = getLatLon(city_obj)
+    return lat, lon
+}
+
+func unmarshalCity(raw_city []byte, city_obj *InCity) {
+    err := json.Unmarshal(raw_city, city_obj)
+    if err != nil {
+        fmt.Println("JSON Marshal error:", err)
+    }
+}
+
+func getLatLon(city_obj InCity) (float32, float32) {
     var lat float32 = city_obj[0].Lat
     var lon float32 = city_obj[0].Lon
     fmt.Println("City:", city_obj[0].Name, lat, lon)
