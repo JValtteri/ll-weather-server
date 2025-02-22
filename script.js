@@ -40,11 +40,15 @@ async function fetchWeatherData(cityName) {
     }
 }
 
-submitButton.addEventListener("click", () => {
-    console.log("Clikked");
+function submitCity() {
     if (cityInput.value && cityInput.value != "City") {
         fetchWeatherData(cityInput.value);
     }
+}
+
+submitButton.addEventListener("click", () => {
+    console.log("Clikked");
+    submitCity();
 });
 
 dayButton.addEventListener("click", () => {
@@ -60,4 +64,10 @@ dayButton.addEventListener("click", () => {
 
 cityInput.addEventListener("click", () => {
     cityInput.value = "";
+});
+
+cityInput.addEventListener('keydown', (event) => {
+    if (event.key === "Enter") {
+        submitCity();
+    }
 });
