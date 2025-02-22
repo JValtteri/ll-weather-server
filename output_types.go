@@ -5,15 +5,17 @@ package main
  */
 
 import (
+    "time"
 )
 
 type WeekWeather struct {
     City string
+    Timestamp uint
     Days []DayWeather
 }
 
 type DayWeather struct {
-    DayNo uint
+    DayName string
     Day struct {
         Temp float32
         Description string
@@ -40,28 +42,29 @@ const REFERENCE_TIME uint = 1740096000
 const SECONDS_IN_DAY uint = 86400;
 const SECONDS_IN_HOUR uint = 3600;
 
-func convertTime(timestamp uint) (uint, uint) {
+func convertTime(timestamp uint) (string, uint) {
     calibratedTime := timestamp - REFERENCE_TIME
-    time := (calibratedTime % SECONDS_IN_DAY) / SECONDS_IN_HOUR
-    day := calibratedTime / SECONDS_IN_DAY
-    return day, time
+    hour := (calibratedTime % SECONDS_IN_DAY) / SECONDS_IN_HOUR
+    // day := calibratedTime / SECONDS_IN_DAY
+    dayname := time.Unix(int64(timestamp), 0).Weekday().String()
+    return dayname, hour
 }
 
 func mapDays(raw_weather InWeatherRange) WeekWeather {
     // Expected timeslots
     // 0 3 6 9 12 15 18 21 (24)
     var week WeekWeather
-    var time uint = 0
+    var hour uint = 0
     days := make([]DayWeather, 5, 7)
 
     var i int = 0
     var day_no int = 0
     for i < len(raw_weather.List) {
-        _, time = convertTime(raw_weather.List[i].Dt)
-        if time == 12 {
+        _, hour = convertTime(raw_weather.List[i].Dt)
+        if hour == 12 {
             var day DayWeather
             // Populate 12:00 data
-            day.DayNo, _        = convertTime(raw_weather.List[i].Dt)
+            day.DayName, _      = convertTime(raw_weather.List[i].Dt)
             day.Day.Temp        = raw_weather.List[i].Main.Temp
             day.Day.Humidity    = raw_weather.List[i].Main.Humidity
             day.Day.Description = raw_weather.List[i].Weather[0].Description
@@ -96,6 +99,7 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
     }
     // Populate metadata
     week.City = raw_weather.City.Name
+    week.Timestamp = uint(time.Now().Unix())
     week.Days = days
     return week
 }
@@ -105,19 +109,3 @@ func filterDay(raw_weather InWeatherRange) DayWeather {
 
     return day
 }
-
-/*
-func AppendDay(slice []DayWeather, day DayWeather) []DayWeather {
-    m := len(slice)
-    n := m + len(day)
-    if n > cap(slice) { // if necessary, reallocate
-        // allocate double what's needed, for future growth.
-        newSlice := make([]byte, (n+1)*2)
-        copy(newSlice, slice)
-        slice = newSlice
-    }
-    slice = slice[0:n]
-    copy(slice[m:n], day)
-    return slice
-}
-*/
