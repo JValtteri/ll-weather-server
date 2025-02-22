@@ -3,7 +3,7 @@ package main
 import (
     "errors"
     "fmt"
-    //"encoding/json"
+    "time"
 )
 
 type Coords struct {
@@ -39,12 +39,19 @@ func getProxyWeather(city string, mode int) (InWeatherRange, error) {
         fmt.Println(err)
         return emptyWeather, err
     }
+    var r_obj InWeatherRange
+    var ok bool
     // Check cache
+    r_obj, ok = searchCacheWeather(city)
+    if ok {
+        fmt.Println("Found cached:", city)
+        return r_obj, nil
+    }
     // Make request
-    var r_obj InWeatherRange = getWeather(lat, lon)
-    // Format response
-
+    r_obj = getWeather(lat, lon)
     // Cache response
+    r_obj.timestamp = uint(time.Now().Unix())
+    addCacheWeather(city, r_obj)
     // Return responce
     return r_obj, nil
 }
@@ -64,13 +71,24 @@ func searchCacheCity(key string) (float32, float32, bool) {
     return coords.lat, coords.lon, ok
 }
 
-/*
-func searchCacheCity(key string) (float32, float32, bool) {
-    city_obj, ok := cityCache[key]
-    if !ok {
-        return 0, 0, false
-    }
-    var lat, lon float32 = getLatLon(city_obj)
-    return lat, lon, ok
+func addCacheWeather(key string, r_obj InWeatherRange) {
+    weatheCache[key] = r_obj
 }
-*/
+
+func searchCacheWeather(key string) (InWeatherRange, bool) {
+    r_obj, ok := weatheCache[key]
+    if !ok {
+        var emptyResponse InWeatherRange
+        return emptyResponse, false
+    }
+    // check age
+    fmt.Println("Now:",time.Now().Unix())
+    fmt.Println("DT :",r_obj.timestamp)
+    if (uint(time.Now().Unix()) - r_obj.timestamp) > (SECONDS_IN_HOUR*12) {
+        fmt.Println("Purge old weather data")
+        delete(weatheCache, key)
+        var emptyResponse InWeatherRange
+        return emptyResponse, false
+    }
+    return r_obj, ok
+}

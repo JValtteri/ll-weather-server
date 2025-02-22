@@ -10,6 +10,7 @@ import (
 // Range Data //
 
 type InWeatherRange struct {
+    timestamp uint
     Cod string
     City struct {
         Name string
