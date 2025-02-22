@@ -2,7 +2,9 @@
 const submitButton  = document.getElementById("submit-button");
 const dayButton     = document.getElementById("day-night");
 const daysForecast  = document.getElementById("days-forecast");
-const cityTitle  = document.getElementById("city-name-title");
+const cityInput     = document.getElementById('city-name');
+const cityTitle     = document.getElementById("city-name-title");
+
 let data = null;
 let timeframe = 1;  // 1 = Day, 0 = Night
 
@@ -40,8 +42,7 @@ async function fetchWeatherData(cityName) {
 
 submitButton.addEventListener("click", () => {
     console.log("Clikked");
-    const cityInput = document.getElementById('city-name');
-    if (cityInput.value) {
+    if (cityInput.value && cityInput.value != "City") {
         fetchWeatherData(cityInput.value);
     }
 });
@@ -57,4 +58,6 @@ dayButton.addEventListener("click", () => {
     }
 });
 
-
+cityInput.addEventListener("click", () => {
+    cityInput.value = "";
+});
