@@ -22,14 +22,16 @@ func apiUp(w http.ResponseWriter, request *http.Request) {
 
 func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     var city string
+    var f_obj WeekWeather
     city = request.URL.Query().Get("name")
-    r_obj, err := getSummaryWeather(city, 0)
+    r_obj, err := getWeather(city, 0)
+    f_obj = mapDays(r_obj)
     setCorrs(w)
     if err != nil {
         http.NotFound(w, request)
     }
     w.Header().Set("Content-Type", "application/json")
-    fmt.Fprintf(w, unloadJSON(r_obj))
+    fmt.Fprintf(w, unloadJSON(f_obj))
 }
 
 func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
