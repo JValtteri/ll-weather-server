@@ -23,8 +23,11 @@ func apiUp(w http.ResponseWriter, request *http.Request) {
 func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     var city string
     city = request.URL.Query().Get("name")
-    r_obj := getSummaryWeather(city)
+    r_obj, err := getSummaryWeather(city, 0)
     setCorrs(w)
+    if err != nil {
+        http.NotFound(w, request)
+    }
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprintf(w, unloadJSON(r_obj))
 }

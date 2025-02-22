@@ -45,3 +45,11 @@ type InWeather struct {
     }
 }
 
+// City Object //
+
+type InCity []struct {
+    Name string
+    Lat float32
+    Lon float32
+    Country string
+}

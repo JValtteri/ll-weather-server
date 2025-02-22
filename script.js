@@ -2,6 +2,7 @@
 const submitButton  = document.getElementById("submit-button");
 const dayButton     = document.getElementById("day-night");
 const daysForecast  = document.getElementById("days-forecast");
+const cityTitle  = document.getElementById("city-name-title");
 let data = null;
 let timeframe = 1;  // 1 = Day, 0 = Night
 
@@ -30,6 +31,7 @@ async function fetchWeatherData(cityName) {
         data = await response.json();
         // Enable Night button
         dayButton.removeAttribute("disabled");
+        cityTitle.textContent = data.City;
         populateTable(data.Days, timeframe);
     } catch (error) {
         console.error('There has been a problem with your fetch operation:', error);
