@@ -4,6 +4,7 @@ const dayButton     = document.getElementById("day-night");
 const daysForecast  = document.getElementById("days-forecast");
 const cityInput     = document.getElementById('city-name');
 const cityTitle     = document.getElementById("city-name-title");
+const fullscreenBtn = document.getElementById('fullscreen');
 
 let data = null;
 let timeframe = 1;  // 1 = Day, 0 = Night
@@ -49,6 +50,10 @@ function submitCity() {
     }
 }
 
+function makeFullscreen() {
+    document.querySelector("body").requestFullscreen();
+}
+
 submitButton.addEventListener("click", () => {
     console.log("Clikked");
     submitCity();
@@ -74,3 +79,7 @@ cityInput.addEventListener('keydown', (event) => {
         submitCity();
     }
 });
+
+fullscreenBtn.addEventListener("click", () => {
+    makeFullscreen();
+})
