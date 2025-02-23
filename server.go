@@ -15,23 +15,23 @@ var ORIGIN_URL string = loadConfig()
 
 func server() {
     fmt.Println("Server UP")
-    //mux := http.NewServeMux()
-    http.HandleFunc("/", apiUp)
+    http.HandleFunc("/", defaultRequest)
     http.HandleFunc("/city", cityOverviewRequest)
     http.HandleFunc("/city/detail", cityDetailRequest)
-    //mux.HandleFunc("/img/{id}", iconRequest)
     log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
-func apiUp(w http.ResponseWriter, request *http.Request) {
+func defaultRequest(w http.ResponseWriter, request *http.Request) {
     var path []string = strings.Split(request.URL.Path, "/")
     if path[1] == "img" {
         var id string   = sanitize(path[2])
-        fmt.Println("Icon Path", id)
         var icon []byte = getProxyIcon(id)
         setCorrs(w)
         w.Header().Set("Content-Type", "image/png")
-        _, _ = w.Write(icon)
+        _, err := w.Write(icon)
+        if err != nil {
+            http.Error(w, "Failed to send image", http.StatusInternalServerError)
+        }
     } else {
         fmt.Fprintf(w, "API UP")
     }
@@ -56,13 +56,6 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     city = request.URL.Query().Get("name")
     fmt.Fprintf(w, "Detail Requested: [%s]", city)
 }
-
-/*
-func iconRequest(w http.ResponseWriter, request *http.Request) {
-    id := request.URL.Path
-    fmt.Println("Icon Path", id) // request.PathValue("id"))
-}
-*/
 
 func setCorrs(w http.ResponseWriter) {
     w.Header().Set("Access-Control-Allow-Origin", ORIGIN_URL)

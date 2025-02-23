@@ -16,10 +16,10 @@ var cityCache map[string]Coords           = make(map[string]Coords)
 var iconCache map[string][]byte           = make(map[string][]byte)
 
 func getCityCoord(city string) (float32, float32) {
-    //61.499, 23.787
-    lat, lon, ok := searchCacheCity(city)       // Check cache
+    var lat, lon float32
+    var ok bool
+    lat, lon, ok = searchCacheCity(city)        // Check cache
     if ok {
-        fmt.Println("Found cached name:", city)
         return lat, lon
     }
     lat, lon = getCity(city)                    // Make request
@@ -29,7 +29,7 @@ func getCityCoord(city string) (float32, float32) {
 
 func getProxyWeather(city string, mode int) (InWeatherRange, error) {
     // MODE: 0=summary, 1=detail
-    lat, lon := getCityCoord(city)              // Convert name to coord
+    var lat, lon float32 = getCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather InWeatherRange
         err := errors.New("City not found")
@@ -40,7 +40,6 @@ func getProxyWeather(city string, mode int) (InWeatherRange, error) {
     var ok bool
     r_obj, ok = searchCacheWeather(city)        // Check cache
     if ok {
-        fmt.Println("Found cached data:", city)
         return r_obj, nil
     }
     r_obj = getWeather(lat, lon)                // Make request
@@ -69,7 +68,9 @@ func addCacheCity(key string, lat, lon float32) {
 }
 
 func searchCacheCity(key string) (float32, float32, bool) {
-    coords, ok := cityCache[key]
+    var coords Coords
+    var ok bool
+    coords, ok = cityCache[key]
     if !ok {
         return 0, 0, false
     }
@@ -81,14 +82,15 @@ func addCacheWeather(key string, r_obj InWeatherRange) {
 }
 
 func searchCacheWeather(key string) (InWeatherRange, bool) {
-    r_obj, ok := weatheCache[key]
+    var r_obj InWeatherRange
+    var ok bool
+    r_obj, ok = weatheCache[key]
     if !ok {
         var emptyResponse InWeatherRange
         return emptyResponse, false
     }
-    // check age
-    if (uint(time.Now().Unix()) - r_obj.timestamp) > (SECONDS_IN_HOUR*12) {
-        fmt.Println("Purge old weather data")
+    var tagAge uint = (uint(time.Now().Unix()) - r_obj.timestamp)
+    if tagAge > (SECONDS_IN_HOUR*12) {
         delete(weatheCache, key)
         var emptyResponse InWeatherRange
         return emptyResponse, false
@@ -101,7 +103,9 @@ func addCacheIcon(key string, data []byte) {
 }
 
 func searchCacheIcon(key string) ([]byte, bool) {
-    data, ok := iconCache[key]
+    var data []byte
+    var ok bool
+    data, ok = iconCache[key]
     if !ok {
         var no_data []byte
         return no_data, false

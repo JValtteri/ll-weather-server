@@ -45,7 +45,6 @@ const SECONDS_IN_HOUR uint = 3600;
 func convertTime(timestamp uint) (string, uint) {
     calibratedTime := timestamp - REFERENCE_TIME
     hour := (calibratedTime % SECONDS_IN_DAY) / SECONDS_IN_HOUR
-    // day := calibratedTime / SECONDS_IN_DAY
     dayname := time.Unix(int64(timestamp), 0).Weekday().String()
     return dayname, hour
 }

@@ -27,8 +27,7 @@ func getWeather(lat float32, lon float32) InWeatherRange {
         updateKey()
     }
     fmt.Println("Get weather at", lat, lon)
-    requestURL := makeWeatherURL(lat, lon, UNITS)
-    fmt.Println(requestURL)
+    var requestURL string = makeWeatherURL(lat, lon, UNITS)
     var raw_weather []byte = makeRequest(requestURL)
     err := json.Unmarshal(raw_weather, &weather_obj)
     if err != nil {
@@ -42,10 +41,8 @@ func getCity(name string) (float32, float32) {
     if API_KEY == "no-key" {
         updateKey()
     }
-    fmt.Println("Get city:", name)
-    requestURL := makeCityURL(name, COUNTRY, CITY_LIMIT)
-    fmt.Println(requestURL)
-    var raw_city []byte = makeRequest(requestURL)
+    var requestURL string = makeCityURL(name, COUNTRY, CITY_LIMIT)
+    var raw_city []byte   = makeRequest(requestURL)
     unmarshalCity(raw_city, &city_obj)
     if len(city_obj) == 0 {
         return 0.0, 0.0
@@ -56,9 +53,8 @@ func getCity(name string) (float32, float32) {
 
 func getIcon(id string) []byte {
     fmt.Println("Get icon:", id)
-    requestURL := makeIconURL(id)
-    fmt.Println(requestURL)
-    var raw_icon []byte = makeRequest(requestURL)
+    var requestURL string = makeIconURL(id)
+    var raw_icon []byte   = makeRequest(requestURL)
     return raw_icon
 }
 
@@ -112,12 +108,12 @@ func makeIconURL(id string) string {
 func makeRequest(address string) []byte {
     resp, err := http.Get(address)
     if err != nil {
-        fmt.Sprintf("Welp! GET from %s failed", address)
+        fmt.Printf("Welp! GET from %s failed", address)
     }
     defer resp.Body.Close()
     body, err := io.ReadAll(resp.Body)
     if err != nil {
-        fmt.Sprintf("Error reading response body:", err)
+        fmt.Printf("Error reading response body:", err)
     }
     return body
 }
