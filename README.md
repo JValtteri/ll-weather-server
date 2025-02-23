@@ -17,9 +17,10 @@ Intended to be dockerized
   - [x] Temperature
   - [x] Total cloud %
   - [x] Humidity data
+  - [x] Weather Icons
   - [ ] Wind direction and speed
 - [ ] Location in URL for easy bookmarking
-- [ ] Configfile
+- [x] Configfile
 - [ ] Dockerized
 - [ ] (uses multiple data sources?)
 
@@ -28,4 +29,9 @@ Intended to be dockerized
 | Desc. | filename | Notes |
 | -- | -- | -- |
 | Keyfile | `key.txt` | Contains the API key for Openweathermap |
-| Configfile | `config.txt` | Contains the base URL for the server |
+| Configfile | `config.txt` | Contains the base URL:Port for the server |
+
+###### Example config
+```
+http://localhost:3000
+```
