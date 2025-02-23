@@ -18,10 +18,12 @@ function populateTable(days) {
             target = day.Night
         }
         daysForecast.rows[0].cells[day_index].textContent = day.DayName;
-        daysForecast.rows[1].cells[day_index].textContent = target.Description;
-        daysForecast.rows[2].cells[day_index].textContent = target.Temp;
-        daysForecast.rows[3].cells[day_index].textContent = target.Humidity;
-        daysForecast.rows[4].cells[day_index].textContent = target.Clouds;
+        daysForecast.rows[1].cells[day_index].childNodes[0].src = "http://localhost:3000/img/"+target.IconID
+        daysForecast.rows[1].cells[day_index].childNodes[0].alt = target.Description;
+        daysForecast.rows[2].cells[day_index].textContent = target.Description;
+        daysForecast.rows[3].cells[day_index].textContent = target.Temp;
+        daysForecast.rows[4].cells[day_index].textContent = target.Humidity;
+        daysForecast.rows[5].cells[day_index].textContent = target.Clouds;
         day_index += 1;
     });
 }

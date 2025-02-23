@@ -12,6 +12,7 @@ import (
 
 const FORECAST_URL string = "https://api.openweathermap.org/data/2.5/forecast?lat={LAT}&lon={LON}&units={UNITS}&appid={API_KEY}"
 const CITY_URL string = "https://api.openweathermap.org/geo/1.0/direct?q={CITY_NAME},{COUNTRY_CODE}&limit={LIMIT}&appid={API_KEY}"
+const ICON_URL = "http://openweathermap.org/img/wn/{ICON}@2x.png"
 
 const KEYFILE string = "key.txt"
 var API_KEY string = "no-key"
@@ -51,6 +52,14 @@ func getCity(name string) (float32, float32) {
     }
     var lat, lon float32 = getLatLon(city_obj)
     return lat, lon
+}
+
+func getIcon(id string) []byte {
+    fmt.Println("Get icon:", id)
+    requestURL := makeIconURL(id)
+    fmt.Println(requestURL)
+    var raw_icon []byte = makeRequest(requestURL)
+    return raw_icon
 }
 
 func unmarshalCity(raw_city []byte, city_obj *InCity) {
@@ -93,6 +102,12 @@ func makeCityURL(name, country, limit string) string {
     return url
 }
 
+func makeIconURL(id string) string {
+    url := ""
+    url = strings.Replace(ICON_URL, "{ICON}", id, 1)
+    return url
+}
+
 // Make a request to chosen address
 func makeRequest(address string) []byte {
     resp, err := http.Get(address)
@@ -106,7 +121,6 @@ func makeRequest(address string) []byte {
     }
     return body
 }
-
 
 // UTILS
 
