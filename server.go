@@ -11,19 +11,17 @@ import (
 )
 
 const CONFIG_FILE string = "config.txt"
-var ORIGIN_URL string = loadConfig()
+var ORIGIN_URL, SERVER_PORT string
 
 func server() {
     fmt.Println("Server UP")
-
+    ORIGIN_URL, SERVER_PORT = loadConfig()
     http.HandleFunc("/", defaultRequest)
-
     http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./static/css"))))
     http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./static/js"))))
-
     http.HandleFunc("/city", cityOverviewRequest)
     http.HandleFunc("/city/detail", cityDetailRequest)
-    log.Fatal(http.ListenAndServe(":3000", nil))
+    log.Fatal(http.ListenAndServe( SERVER_PORT, nil))
 }
 
 func defaultRequest(w http.ResponseWriter, request *http.Request) {
@@ -38,7 +36,6 @@ func defaultRequest(w http.ResponseWriter, request *http.Request) {
             http.Error(w, "Failed to send image", http.StatusInternalServerError)
         }
     } else {
-        //fmt.Fprintf(w, "API UP")
         http.ServeFile(w, request, "./static/index.html")
     }
 }
@@ -83,10 +80,14 @@ func sanitize(input string) string {
     return result.String()
 }
 
-func loadConfig() string {
+func loadConfig() (string, string) {
     content, err := os.ReadFile(CONFIG_FILE)
     if err != nil {
         log.Fatal(err)
     }
-    return string(content)
+    config := strings.Split(string(content), ":")
+    var url string  = fmt.Sprintf( "%s:%s", config[0], config[1])
+    var port string = fmt.Sprintf( ":%s", config[len(config)-1])
+    fmt.Println("Server url/port:", url, port)
+    return url, port
 }
