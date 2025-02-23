@@ -7,9 +7,11 @@ import (
     "strings"
     "unicode"
     "unicode/utf8"
+    "os"
 )
 
-const ORIGIN_URL string = "http://localhost:8000"
+const CONFIG_FILE string = "config.txt"
+var ORIGIN_URL string = loadConfig()
 
 func server() {
     fmt.Println("Server UP")
@@ -61,4 +63,12 @@ func sanitize(input string) string {
         }
     }
     return result.String()
+}
+
+func loadConfig() string {
+    content, err := os.ReadFile(CONFIG_FILE)
+    if err != nil {
+        log.Fatal(err)
+    }
+    return string(content)
 }
