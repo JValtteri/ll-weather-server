@@ -19,7 +19,7 @@ func getCityCoord(city string) (float32, float32) {
     // Check cache
     lat, lon, ok := searchCacheCity(city)
     if ok {
-        fmt.Println("Found cached:", city)
+        fmt.Println("Found cached name:", city)
         return lat, lon
     }
     // Make request
@@ -44,7 +44,7 @@ func getProxyWeather(city string, mode int) (InWeatherRange, error) {
     // Check cache
     r_obj, ok = searchCacheWeather(city)
     if ok {
-        fmt.Println("Found cached:", city)
+        fmt.Println("Found cached data:", city)
         return r_obj, nil
     }
     // Make request
@@ -82,8 +82,6 @@ func searchCacheWeather(key string) (InWeatherRange, bool) {
         return emptyResponse, false
     }
     // check age
-    fmt.Println("Now:",time.Now().Unix())
-    fmt.Println("DT :",r_obj.timestamp)
     if (uint(time.Now().Unix()) - r_obj.timestamp) > (SECONDS_IN_HOUR*12) {
         fmt.Println("Purge old weather data")
         delete(weatheCache, key)
