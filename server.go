@@ -15,7 +15,12 @@ var ORIGIN_URL string = loadConfig()
 
 func server() {
     fmt.Println("Server UP")
+
     http.HandleFunc("/", defaultRequest)
+
+    http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./static/css"))))
+    http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./static/js"))))
+
     http.HandleFunc("/city", cityOverviewRequest)
     http.HandleFunc("/city/detail", cityDetailRequest)
     log.Fatal(http.ListenAndServe(":3000", nil))
@@ -33,7 +38,8 @@ func defaultRequest(w http.ResponseWriter, request *http.Request) {
             http.Error(w, "Failed to send image", http.StatusInternalServerError)
         }
     } else {
-        fmt.Fprintf(w, "API UP")
+        //fmt.Fprintf(w, "API UP")
+        http.ServeFile(w, request, "./static/index.html")
     }
 }
 

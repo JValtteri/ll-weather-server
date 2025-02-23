@@ -18,7 +18,7 @@ function populateTable(days) {
             target = day.Night
         }
         daysForecast.rows[0].cells[day_index].textContent = day.DayName;
-        daysForecast.rows[1].cells[day_index].childNodes[0].src = "http://localhost:3000/img/"+target.IconID
+        daysForecast.rows[1].cells[day_index].childNodes[0].src = "img/"+target.IconID
         daysForecast.rows[1].cells[day_index].childNodes[0].alt = target.Description;
         daysForecast.rows[2].cells[day_index].textContent = target.Description;
         daysForecast.rows[3].cells[day_index].textContent = target.Temp;
@@ -30,7 +30,7 @@ function populateTable(days) {
 
 async function fetchWeatherData(cityName) {
     try {
-        const response = await fetch(`http://localhost:3000/city?name=${encodeURIComponent(cityName)}`);
+        const response = await fetch(`city?name=${encodeURIComponent(cityName)}`);
         console.log("Requested:", cityName)
         if (!response.ok) throw new Error('Network response was not ok');
         data = await response.json();
