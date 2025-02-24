@@ -30,3 +30,4 @@ __*
 key
 *.pem
 *.json
+*.sh
