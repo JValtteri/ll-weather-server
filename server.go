@@ -24,7 +24,7 @@ var CONFIG Config
 
 func server() {
 
-    fmt.Println("Server UP")
+    log.Println("Server UP")
     loadConfig(&CONFIG)
     http.HandleFunc("/", defaultRequest)
     http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./static/css"))))
@@ -104,10 +104,12 @@ func loadConfig(CONFIG *Config) {
     }
     err = json.Unmarshal(raw_config, &CONFIG)
     if err != nil {
-        fmt.Println(err)
+        log.Println(err)
     }
-    fmt.Printf("Server url/port: %s:%s\n", CONFIG.ORIGIN_URL, CONFIG.SERVER_PORT)
+    log.Printf("Server url/port: %s:%s\n", CONFIG.ORIGIN_URL, CONFIG.SERVER_PORT)
     if CONFIG.ENABLE_TLS {
-        fmt.Printf("TLS Enabled")
+        log.Println("TLS is Enabled")
+    } else {
+        log.Println("HTTP-Only mode")
     }
 }

@@ -26,7 +26,6 @@ func GetWeather(lat float32, lon float32) InWeatherRange {
     if API_KEY == "no-key" {
         updateKey()
     }
-    fmt.Println("Get weather at", lat, lon)
     var requestURL string = makeWeatherURL(lat, lon, UNITS)
     var raw_weather []byte = makeRequest(requestURL)
     err := json.Unmarshal(raw_weather, &weather_obj)
@@ -52,7 +51,6 @@ func GetCity(name string) (float32, float32) {
 }
 
 func GetIcon(id string) []byte {
-    fmt.Println("Get icon:", id)
     var requestURL string = makeIconURL(id)
     var raw_icon []byte   = makeRequest(requestURL)
     return raw_icon
@@ -68,7 +66,6 @@ func unmarshalCity(raw_city []byte, city_obj *InCity) {
 func getLatLon(city_obj InCity) (float32, float32) {
     var lat float32 = city_obj[0].Lat
     var lon float32 = city_obj[0].Lon
-    fmt.Println("City:", city_obj[0].Name, lat, lon)
     return lat, lon
 }
 

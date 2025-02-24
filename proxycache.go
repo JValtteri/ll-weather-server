@@ -3,6 +3,7 @@ package main
 import (
     "errors"
     "fmt"
+    "log"
     "time"
 )
 
@@ -32,16 +33,18 @@ func GetProxyWeather(city string, mode int) (InWeatherRange, error) {
     var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather InWeatherRange
-        err := errors.New("City not found")
-        fmt.Println(err)
+        err := errors.New(fmt.Sprintf("City [%s] not found", city))
+        log.Println(err)
         return emptyWeather, err
     }
     var r_obj InWeatherRange
     var ok bool
     r_obj, ok = searchCacheWeather(city)        // Check cache
     if ok {
+        log.Printf("Get weather: %s at %.3f %.3f\n", city, lat, lon)
         return r_obj, nil
     }
+    log.Printf("Get weather: %s at %.3f %.3f (New request)\n", city, lat, lon)
     r_obj = GetWeather(lat, lon)                // Make request
     r_obj.timestamp = uint(time.Now().Unix())
     addCacheWeather(city, r_obj)                // Cache response
@@ -55,6 +58,7 @@ func GetProxyIcon(id string) []byte {
     if ok {
         return icon
     }
+    log.Printf("Get new icon: %v (New request)\n", id)
     icon = GetIcon(id)                          // Make request
     addCacheIcon(id, icon)                      // Cache response
     return icon

@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-    fmt.Println("Low Latency Weather Server")
+    fmt.Println("### Low Latency Weather Server ###")
     printAttribution()
     server()
     fmt.Println("Shutting down")
@@ -13,5 +13,5 @@ func main() {
 
 func printAttribution() {
     fmt.Println("Data Sources:")
-    fmt.Println("https://openweathermap.org/api")
+    fmt.Println("  https://openweathermap.org/api")
 }
