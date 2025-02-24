@@ -20,7 +20,7 @@ var UNITS string = "metric"
 var COUNTRY string = "FI"
 var CITY_LIMIT string = "1"
 
-func getWeather(lat float32, lon float32) InWeatherRange {
+func GetWeather(lat float32, lon float32) InWeatherRange {
     var weather_obj InWeatherRange
 
     if API_KEY == "no-key" {
@@ -36,7 +36,7 @@ func getWeather(lat float32, lon float32) InWeatherRange {
     return weather_obj
 }
 
-func getCity(name string) (float32, float32) {
+func GetCity(name string) (float32, float32) {
     var city_obj InCity
     if API_KEY == "no-key" {
         updateKey()
@@ -51,7 +51,7 @@ func getCity(name string) (float32, float32) {
     return lat, lon
 }
 
-func getIcon(id string) []byte {
+func GetIcon(id string) []byte {
     fmt.Println("Get icon:", id)
     var requestURL string = makeIconURL(id)
     var raw_icon []byte   = makeRequest(requestURL)

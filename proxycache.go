@@ -15,21 +15,21 @@ var weatheCache map[string]InWeatherRange = make(map[string]InWeatherRange)
 var cityCache map[string]Coords           = make(map[string]Coords)
 var iconCache map[string][]byte           = make(map[string][]byte)
 
-func getCityCoord(city string) (float32, float32) {
+func GetCityCoord(city string) (float32, float32) {
     var lat, lon float32
     var ok bool
     lat, lon, ok = searchCacheCity(city)        // Check cache
     if ok {
         return lat, lon
     }
-    lat, lon = getCity(city)                    // Make request
+    lat, lon = GetCity(city)                    // Make request
     addCacheCity(city, lat, lon)                // Cache coords
     return lat, lon
 }
 
-func getProxyWeather(city string, mode int) (InWeatherRange, error) {
+func GetProxyWeather(city string, mode int) (InWeatherRange, error) {
     // MODE: 0=summary, 1=detail
-    var lat, lon float32 = getCityCoord(city)   // Convert name to coord
+    var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather InWeatherRange
         err := errors.New("City not found")
@@ -42,20 +42,20 @@ func getProxyWeather(city string, mode int) (InWeatherRange, error) {
     if ok {
         return r_obj, nil
     }
-    r_obj = getWeather(lat, lon)                // Make request
+    r_obj = GetWeather(lat, lon)                // Make request
     r_obj.timestamp = uint(time.Now().Unix())
     addCacheWeather(city, r_obj)                // Cache response
     return r_obj, nil
 }
 
-func getProxyIcon(id string) []byte {
+func GetProxyIcon(id string) []byte {
     var icon []byte
     var ok bool
     icon, ok = searchCacheIcon(id)
     if ok {
         return icon
     }
-    icon = getIcon(id)                          // Make request
+    icon = GetIcon(id)                          // Make request
     addCacheIcon(id, icon)                      // Cache response
     return icon
 }

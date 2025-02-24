@@ -28,7 +28,7 @@ func defaultRequest(w http.ResponseWriter, request *http.Request) {
     var path []string = strings.Split(request.URL.Path, "/")
     if path[1] == "img" {
         var id string   = sanitize(path[2])
-        var icon []byte = getProxyIcon(id)
+        var icon []byte = GetProxyIcon(id)
         setCorrs(w)
         w.Header().Set("Content-Type", "image/png")
         _, err := w.Write(icon)
@@ -44,7 +44,7 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     var city string
     var f_obj WeekWeather
     city = sanitize(request.URL.Query().Get("name"))
-    r_obj, err := getProxyWeather(city, 0)
+    r_obj, err := GetProxyWeather(city, 0)
     f_obj = mapDays(r_obj)
     setCorrs(w)
     if err != nil {
