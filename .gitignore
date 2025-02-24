@@ -28,3 +28,5 @@ go.work.sum
 *.txt
 __*
 key
+*.pem
+*.json

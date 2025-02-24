@@ -34,12 +34,26 @@ Config files `key.txt` and `config.txt` should be placed in the server root dire
 | Desc. | filename | Notes |
 | -- | -- | -- |
 | Keyfile | `key.txt` | Contains the API key for Openweathermap |
-| Configfile | `config.txt` | Contains the base URL:Port for the server |
+| Configfile | `config.json` | Contains the base URL:Port for the server |
 
 ###### Example config
+
+```json
+{
+  "ORIGIN_URL": "http://localhost",
+  "SERVER_PORT": "3000",
+  "ENABLE_TLS": false,
+  "CERT_FILE": "",
+  "PRIVATE_KEY_FILE": ""
+}
 ```
-http://localhost:3000
-```
+
+`"ORIGIN_URL"` should be the address the server is accessed at
+
+#### HTTPS/TLS
+
+To enable HTTPS, you need a valid certificate file and private key file.
+Set `"ENABLE_TLS": true` and give the cert and private key file names to `"CERT_FILE":` and `"PRIVATE_KEY_FILE":` respectively.
 
 ## Running server
 
