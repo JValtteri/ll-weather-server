@@ -1,12 +1,10 @@
 # Low Latency Weather Server
 
-A weather server, with *golang* backend and *JS* front.
-
-Intended to be dockerized
+A weather server, with **Go** backend and **JS** front.
 
 ## Requirements
 
-- [go](https://go.dev/) 1.19 or newer
+- [**Go**](https://go.dev/) 1.19 or newer
 
 ## Planned and Completed Features
 
@@ -33,8 +31,8 @@ Config files `key.txt` and `config.txt` should be placed in the server root dire
 
 | Desc. | filename | Notes |
 | -- | -- | -- |
-| Keyfile | `key.txt` | Contains the API key for Openweathermap |
-| Configfile | `config.json` | Contains the base URL:Port for the server |
+| Keyfile | `key.txt` | Should contain your API key for Openweathermap |
+| Configfile | `config.json` | Server configuration |
 
 ###### Example config
 
@@ -57,7 +55,7 @@ Set `"ENABLE_TLS": true` and give the cert and private key file names to `"CERT_
 
 ## Running server
 
-As long as [*go*](https://go.dev/) is installed, you can run the server with this command
+As long as [**Go**](https://go.dev/) is installed, you can run the server with this command
 ```
 go run .
 ```
