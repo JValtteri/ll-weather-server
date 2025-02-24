@@ -1,6 +1,10 @@
 # Low Latency Weather Server
 
-A weather server, with **Go** backend and **JS** front.
+A weather forecast web app with a **Go** backend.
+
+## Description
+
+A fast, light weight, all-in-one web app to provide weather forecasts. Some weather forecast services provide web pages that are heavy and slow to load. LL-Weather-Server is as light and lean as can be. The backend is done with **Go**. The primary source for data is [openweathermap.org](https://openweathermap.org/api). The data is cached in the backend to reduce required API calls and speed up the responses.
 
 ## Requirements
 
@@ -8,12 +12,13 @@ A weather server, with **Go** backend and **JS** front.
 
 ## Planned and Completed Features
 
-- [x] Caching weather data
 - [x] Light weight
+- [x] Weather data caching
+- [x] Search for cities
+- [x] Configfile (JSON)
+- [ ] Expand day previews to show detailed forecast for the day
 - [x] Show weather preview for noon and night (22:00), for astronomy purposes
 - [ ] Seamless update of data, but cached data for lighting fast initial response
-- [ ] Expand day previews to show detailed forecast for the day
-- [x] Search for cities within Finland
 - [ ] Show at a glance
   - [x] Temperature
   - [x] Total cloud %
@@ -21,9 +26,8 @@ A weather server, with **Go** backend and **JS** front.
   - [x] Weather Icons
   - [ ] Wind direction and speed
 - [ ] Location in URL for easy bookmarking
-- [x] Configfile
 - [ ] Dockerized
-- [ ] (uses multiple data sources?)
+- [ ] Aggregate multiple data sources
 
 ## Configuration
 
