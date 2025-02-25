@@ -19,15 +19,14 @@ A fast, light weight, all-in-one web app to provide weather forecasts. Some weat
 - [ ] Expand day previews to show detailed forecast for the day
 - [x] Show weather preview for noon and night (22:00), for astronomy purposes
 - [ ] Seamless update of data, but cached data for lighting fast initial response
-- [ ] Show at a glance
-  - [x] Temperature
-  - [x] Total cloud %
-  - [x] Humidity data
-  - [x] Weather Icons
-  - [ ] Wind direction and speed
-- [ ] Location in URL for easy bookmarking
+- [x] Show at a glance
+- [ ] Customization
+- [ ] Location and customization in URL for easy bookmarking
 - [ ] Dockerized
 - [ ] Aggregate multiple data sources
+- [ ] Weather Map
+- [ ] Implement cache size limiting
+- [ ] Tests
 
 ## Configuration
 
