@@ -12,7 +12,7 @@ import (
 
 const FORECAST_URL string = "https://api.openweathermap.org/data/2.5/forecast?lat={LAT}&lon={LON}&units={UNITS}&appid={API_KEY}"
 const CITY_URL string = "https://api.openweathermap.org/geo/1.0/direct?q={CITY_NAME},{COUNTRY_CODE}&limit={LIMIT}&appid={API_KEY}"
-const ICON_URL = "http://openweathermap.org/img/wn/{ICON}@2x.png"
+const ICON_URL = "https://openweathermap.org/img/wn/{ICON}@2x.png"
 
 type Api_config struct {
     KEYFILE    string

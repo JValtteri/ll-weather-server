@@ -19,6 +19,8 @@ type Config struct {
     PRIVATE_KEY_FILE string
     UNITS            string
     COUNTRY_CODE     string
+    CACHE_AGE        uint  // Hours
+    CACHE_SIZE       uint
 }
 
 const CONFIG_FILE string = "config.json"
@@ -106,7 +108,7 @@ func loadConfig(CONFIG *Config) {
     }
     err = json.Unmarshal(raw_config, &CONFIG)
     if err != nil {
-        log.Println(err)
+        log.Fatal(err)
     }
     log.Printf("Server url/port: %s:%s\n", CONFIG.ORIGIN_URL, CONFIG.SERVER_PORT)
     if CONFIG.ENABLE_TLS {

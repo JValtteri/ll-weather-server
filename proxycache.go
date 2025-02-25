@@ -94,7 +94,7 @@ func searchCacheWeather(key string) (InWeatherRange, bool) {
         return emptyResponse, false
     }
     var tagAge uint = (uint(time.Now().Unix()) - r_obj.timestamp)
-    if tagAge > (SECONDS_IN_HOUR*12) {
+    if tagAge > (SECONDS_IN_HOUR*CONFIG.CACHE_AGE) {
         delete(weatheCache, key)
         var emptyResponse InWeatherRange
         return emptyResponse, false

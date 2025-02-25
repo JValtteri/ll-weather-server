@@ -48,7 +48,9 @@ Config files `key.txt` and `config.json` should be placed in the server root dir
   "CERT_FILE": "",
   "PRIVATE_KEY_FILE": "",
   "UNITS": "metric",
-  "COUNTRY": "FI"
+  "COUNTRY": "FI",
+  "CACHE_AGE": 6,
+  "CACHE_SIZE": 200
 }
 ```
 
@@ -61,6 +63,8 @@ Config files `key.txt` and `config.json` should be placed in the server root dir
 | `PRIVATE_KEY_FILE` | `""` | TLS Private key file |
 | `UNITS` | `"metric"` | metric/imperial/kelvin |
 | `COUNTRY` | `"FI"` | ISO 3166 country code |
+| `CACHE_AGE` | 6 | Max age in hours |
+| `CACHE_SIZE` | 200 | Max size |
 
 `"ORIGIN_URL"` should be the address the server is accessed at
 `"COUNTRY"` is used to limit the region where seached city names are matched

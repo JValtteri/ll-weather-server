@@ -9,33 +9,42 @@ import (
 )
 
 type WeekWeather struct {
-    City string
+    City      string
     Timestamp uint
-    Days []DayWeather
+    Days      []DayWeather
 }
 
 type DayWeather struct {
-    DayName string
-    Day struct {
-        Temp float32
-        Description string
-        Humidity float32
-        Clouds uint
-        Visibility uint
-        Windspeed float32
-        WindDeg int
-        IconID string
+    DayName    string
+    RainChance float32
+    RainTotal  float32
+    Day        WeatherData
+    Night      WeatherData
+}
+
+type WeatherData struct {
+    Temp        float32
+    Description string
+
+    Wind struct {
+        Speed float32
+        Gust  float32
+        Deg   int
     }
-    Night struct {
-        Temp float32
-        Description string
-        Humidity float32
+    Humidity float32
+    Pressure int       // Sea level
+    Clouds struct {
         Clouds uint
-        Visibility uint
-        Windspeed float32
-        WindDeg int
-        IconID string
+        Low    uint    // Cloud layers
+        Mid    uint
+        High   uint
     }
+    Rain struct {
+        Chance float32 // %
+        Amount float32 // mm
+    }
+    Visibility uint
+    IconID     string
 }
 
 const REFERENCE_TIME uint = 1740096000
@@ -63,15 +72,17 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
         if hour == 12 {
             var day DayWeather
             // Populate 12:00 data
-            day.DayName, _      = convertTime(raw_weather.List[i].Dt)
-            day.Day.Temp        = raw_weather.List[i].Main.Temp
-            day.Day.Humidity    = raw_weather.List[i].Main.Humidity
-            day.Day.Description = raw_weather.List[i].Weather[0].Description
-            day.Day.IconID      = raw_weather.List[i].Weather[0].Icon
-            day.Day.Clouds      = raw_weather.List[i].Clouds.All
-            day.Day.Visibility  = raw_weather.List[i].Visibility
-            day.Day.Windspeed   = raw_weather.List[i].Wind.Speed
-            day.Day.WindDeg     = raw_weather.List[i].Wind.Deg
+            day.DayName, _        = convertTime(raw_weather.List[i].Dt)
+            day.Day.Temp          = raw_weather.List[i].Main.Temp
+            day.Day.Humidity      = raw_weather.List[i].Main.Humidity
+            day.Day.Description   = raw_weather.List[i].Weather[0].Description
+            day.Day.IconID        = raw_weather.List[i].Weather[0].Icon
+            day.Day.Clouds.Clouds = raw_weather.List[i].Clouds.All
+            day.RainChance        = raw_weather.List[i].Pop         // Add aggregate math
+            day.RainTotal         = raw_weather.List[i].Rain.Mm     // Add aggregate math
+            day.Day.Visibility    = raw_weather.List[i].Visibility
+            day.Day.Wind.Speed    = raw_weather.List[i].Wind.Speed
+            day.Day.Wind.Deg      = raw_weather.List[i].Wind.Deg
 
             // Move index to night 22:00
             i += 3
@@ -80,14 +91,14 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
                 days[day_no] = day
                 break
             }
-            day.Night.Temp        = raw_weather.List[i].Main.Temp
-            day.Night.Humidity    = raw_weather.List[i].Main.Humidity
-            day.Night.Description = raw_weather.List[i].Weather[0].Description
-            day.Night.IconID      = raw_weather.List[i].Weather[0].Icon
-            day.Night.Clouds      = raw_weather.List[i].Clouds.All
-            day.Night.Visibility  = raw_weather.List[i].Visibility
-            day.Night.Windspeed   = raw_weather.List[i].Wind.Speed
-            day.Night.WindDeg     = raw_weather.List[i].Wind.Deg
+            day.Night.Temp          = raw_weather.List[i].Main.Temp
+            day.Night.Humidity      = raw_weather.List[i].Main.Humidity
+            day.Night.Description   = raw_weather.List[i].Weather[0].Description
+            day.Night.IconID        = raw_weather.List[i].Weather[0].Icon
+            day.Night.Clouds.Clouds = raw_weather.List[i].Clouds.All
+            day.Night.Visibility    = raw_weather.List[i].Visibility
+            day.Night.Wind.Speed    = raw_weather.List[i].Wind.Speed
+            day.Night.Wind.Deg      = raw_weather.List[i].Wind.Deg
 
             days[day_no] = day
             // Jump to next day

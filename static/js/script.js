@@ -9,24 +9,73 @@ const fullscreenBtn = document.getElementById('fullscreen');
 let data = null;
 let timeframe = 1;  // 1 = Day, 0 = Night
 
-function populateTable(days) {
-    let day_index = 1;
-    let target = null;
+function str_tf() {
+    if (timeframe=="1") {
+        return "Day";
+    } else {
+        return "Night";
+    }
+}
+
+function populateRow(days, table, elementType, parameters, rowTitle) {
+    // Create new row
+    let rowElm = document.createElement('tr');
+    table.appendChild(rowElm);
+    // Title cells
+    let titleElm = document.createElement(elementType);
+    titleElm.textContent = rowTitle;
+    rowElm.appendChild(titleElm);
+    // Data cells
+    let columnElm;
     days.forEach(day => {
-        if (timeframe=="1") {
-            target = day.Day
-        } else {
-            target = day.Night
+        let dataTarget = day;
+        columnElm = document.createElement(elementType);
+        for (let i = 0; i < parameters.length; ++i) {
+            dataTarget = dataTarget[parameters[i]];
         }
-        daysForecast.rows[0].cells[day_index].textContent = day.DayName;
-        daysForecast.rows[1].cells[day_index].childNodes[0].src = "img/"+target.IconID
-        daysForecast.rows[1].cells[day_index].childNodes[0].alt = target.Description;
-        daysForecast.rows[2].cells[day_index].textContent = target.Description;
-        daysForecast.rows[3].cells[day_index].textContent = target.Temp;
-        daysForecast.rows[4].cells[day_index].textContent = target.Humidity;
-        daysForecast.rows[5].cells[day_index].textContent = target.Clouds;
-        day_index += 1;
+        columnElm.textContent = dataTarget;
+        rowElm.appendChild(columnElm);
     });
+}
+
+// Create Image row
+function populateImageRow(days, table, parameter, rowTitle) {
+    // Create new row
+    let rowElm = document.createElement('tr');
+    table.appendChild(rowElm);
+    // Title cells
+    let titleElm = document.createElement('td');
+    titleElm.textContent = rowTitle;
+    rowElm.appendChild(titleElm);
+    // Data cells
+    let columnElm;
+    days.forEach(day => {
+        let dataTarget = day;
+        columnElm = document.createElement('td');
+        let imgElm = document.createElement('img');
+        imgElm.src = "img/"+dataTarget[parameter].IconID
+        imgElm.alt = dataTarget[parameter].Description;
+        columnElm.appendChild(imgElm);
+        rowElm.appendChild(columnElm);
+    });
+}
+
+function populateTable(days) {
+    // Create rows and titles
+    daysForecast.innerHTML = "";
+    populateRow(days, daysForecast, 'th', ['DayName'],                  "");          //Day name
+    populateImageRow(days, daysForecast, str_tf(), "");                                         // Icons
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Description'],      "Desc.");
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Temp'],             "Temp.");
+    populateRow(days, daysForecast, 'td', ['RainChance'],                 "Rain%");     // Chance
+    populateRow(days, daysForecast, 'td', ['RainTotal'],                  "Rain [mm]"); // Total
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Clouds','Clouds'],  "Clouds %");  // Total
+                                                                                      // Layers
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Wind','Speed'],     "Wind");
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Wind','Deg'],       "Direction");
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Pressure'],         "Pressure");
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Humidity'],         "Humidity");
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Visibility'],       "Visibility");
 }
 
 async function fetchWeatherData(cityName) {
