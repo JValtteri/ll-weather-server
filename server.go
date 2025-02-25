@@ -12,24 +12,26 @@ import (
 )
 
 type Config struct {
-    ORIGIN_URL string
-    SERVER_PORT string
-    ENABLE_TLS bool
-    CERT_FILE string
+    ORIGIN_URL       string
+    SERVER_PORT      string
+    ENABLE_TLS       bool
+    CERT_FILE        string
     PRIVATE_KEY_FILE string
+    UNITS            string
+    COUNTRY_CODE     string
 }
 
 const CONFIG_FILE string = "config.json"
 var CONFIG Config
 
 func server() {
-
     log.Println("Server UP")
     loadConfig(&CONFIG)
+    LoadAPIConfig(CONFIG.UNITS, CONFIG.COUNTRY_CODE)
     http.HandleFunc("/", defaultRequest)
     http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./static/css"))))
-    http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("./static/js"))))
-    http.HandleFunc("/city", cityOverviewRequest)
+    http.Handle("/js/",  http.StripPrefix("/js/",  http.FileServer(http.Dir("./static/js"))))
+    http.HandleFunc("/city",        cityOverviewRequest)
     http.HandleFunc("/city/detail", cityDetailRequest)
     if CONFIG.ENABLE_TLS {
         log.Fatal(http.ListenAndServeTLS(

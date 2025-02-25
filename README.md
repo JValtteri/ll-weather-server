@@ -46,11 +46,24 @@ Config files `key.txt` and `config.txt` should be placed in the server root dire
   "SERVER_PORT": "3000",
   "ENABLE_TLS": false,
   "CERT_FILE": "",
-  "PRIVATE_KEY_FILE": ""
+  "PRIVATE_KEY_FILE": "",
+  "UNITS": "metric",
+  "COUNTRY": "FI"
 }
 ```
 
+| Key | default | Description |
+| -- | -- | -- |
+| "ORIGIN_URL" | "http://localhost" | Server web address |
+| "SERVER_PORT" | "3000" | port |
+| "ENABLE_TLS": | false | Use HTTPS |
+| "CERT_FILE": | "" | Certificate file |
+| "PRIVATE_KEY_FILE" | "" | TLS Private key file |
+| "UNITS" | "metric" | metric/imperial/kelvin |
+| "COUNTRY" | "FI" | ISO 3166 country code |
+
 `"ORIGIN_URL"` should be the address the server is accessed at
+`"COUNTRY"` is used to limit the region where seached city names are matched
 
 #### HTTPS/TLS
 
