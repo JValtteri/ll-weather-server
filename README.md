@@ -31,14 +31,14 @@ A fast, light weight, all-in-one web app to provide weather forecasts. Some weat
 
 ## Configuration
 
-Config files `key.txt` and `config.txt` should be placed in the server root directory.
+Config files `key.txt` and `config.json` should be placed in the server root directory.
 
 | Desc. | filename | Notes |
 | -- | -- | -- |
 | Keyfile | `key.txt` | Should contain your API key for Openweathermap |
 | Configfile | `config.json` | Server configuration |
 
-###### Example config
+#### Example config
 
 ```json
 {
@@ -54,13 +54,13 @@ Config files `key.txt` and `config.txt` should be placed in the server root dire
 
 | Key | default | Description |
 | -- | -- | -- |
-| "ORIGIN_URL" | "http://localhost" | Server web address |
-| "SERVER_PORT" | "3000" | port |
-| "ENABLE_TLS": | false | Use HTTPS |
-| "CERT_FILE": | "" | Certificate file |
-| "PRIVATE_KEY_FILE" | "" | TLS Private key file |
-| "UNITS" | "metric" | metric/imperial/kelvin |
-| "COUNTRY" | "FI" | ISO 3166 country code |
+| `ORIGIN_URL"` | `"http://localhost"` | Server web address |
+| `SERVER_PORT` | `3000` | Port number |
+| `ENABLE_TLS` | `false` | Use HTTPS |
+| `CERT_FILE` | `""` | Certificate file |
+| `PRIVATE_KEY_FILE` | `""` | TLS Private key file |
+| `UNITS` | `"metric"` | metric/imperial/kelvin |
+| `COUNTRY` | `"FI"` | ISO 3166 country code |
 
 `"ORIGIN_URL"` should be the address the server is accessed at
 `"COUNTRY"` is used to limit the region where seached city names are matched
@@ -72,14 +72,18 @@ Set `"ENABLE_TLS": true` and give the cert and private key file names to `"CERT_
 
 ## Running server
 
-As long as [**Go**](https://go.dev/) is installed, you can run the server with this command
+As long as [**Go**](https://go.dev/) is installed and you have created `key.txt` and `config.json` files, you can run the server with this command:
 ```
 go run .
 ```
 
-For long term deployments you should build the server
+For long term deployments you should build the server:
 ```
 go build
+```
+and run the binary:
+```
+./ll-weather-server
 ```
 
 and then run the generated executable `ll-weather-server`
