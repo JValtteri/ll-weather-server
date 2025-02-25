@@ -30,6 +30,7 @@ type WeatherData struct {
         Speed float32
         Gust  float32
         Deg   int
+        Dir   string
     }
     Humidity float32
     Pressure int       // Sea level
@@ -63,34 +64,39 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
     // 0 3 6 9 12 15 18 21 (24)
     var week WeekWeather
     var hour uint = 0
-    days := make([]DayWeather, 5, 7)
-
+    var rainSum float32
+    var maxChance float32
     var i int = 0
     var day_no int = 0
+    var day DayWeather
+    var emptyDay DayWeather
+    days := make([]DayWeather, 5, 8)
     for i < len(raw_weather.List) {
+        if day_no == len(days) {
+            days = append(days, emptyDay)
+        }
+        day = days[day_no]
         _, hour = convertTime(raw_weather.List[i].Dt)
+        if raw_weather.List[i].Pop > maxChance {
+            maxChance = raw_weather.List[i].Pop
+        }
+        rainSum += raw_weather.List[i].Rain.Mm + raw_weather.List[i].Snow.Mm
         if hour == 12 {
-            var day DayWeather
             // Populate 12:00 data
             day.DayName, _        = convertTime(raw_weather.List[i].Dt)
             day.Day.Temp          = raw_weather.List[i].Main.Temp
+            day.Day.Pressure      = raw_weather.List[i].Main.Sea_level
             day.Day.Humidity      = raw_weather.List[i].Main.Humidity
             day.Day.Description   = raw_weather.List[i].Weather[0].Description
             day.Day.IconID        = raw_weather.List[i].Weather[0].Icon
             day.Day.Clouds.Clouds = raw_weather.List[i].Clouds.All
-            day.RainChance        = raw_weather.List[i].Pop         // Add aggregate math
-            day.RainTotal         = raw_weather.List[i].Rain.Mm     // Add aggregate math
             day.Day.Visibility    = raw_weather.List[i].Visibility
             day.Day.Wind.Speed    = raw_weather.List[i].Wind.Speed
             day.Day.Wind.Deg      = raw_weather.List[i].Wind.Deg
-
+            day.Day.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
+            days[day_no] = day  // This should be done differently.
+        } else if hour == 21 {
             // Move index to night 22:00
-            i += 3
-            // Over indexing handling
-            if i >= len(raw_weather.List) {
-                days[day_no] = day
-                break
-            }
             day.Night.Temp          = raw_weather.List[i].Main.Temp
             day.Night.Humidity      = raw_weather.List[i].Main.Humidity
             day.Night.Description   = raw_weather.List[i].Weather[0].Description
@@ -99,11 +105,12 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
             day.Night.Visibility    = raw_weather.List[i].Visibility
             day.Night.Wind.Speed    = raw_weather.List[i].Wind.Speed
             day.Night.Wind.Deg      = raw_weather.List[i].Wind.Deg
+            day.Night.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
 
-            days[day_no] = day
-            // Jump to next day
+            day.RainChance        = maxChance
+            day.RainTotal         = rainSum
+            days[day_no] = day  // This should be done differently.
             day_no += 1
-            i += 4
         }
         i += 1
     }
@@ -114,8 +121,29 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
     return week
 }
 
-func filterDay(raw_weather InWeatherRange) DayWeather {
-    var day DayWeather
 
-    return day
+func windToStr(wind int) string {
+    if wind == 0 {
+        return "N"
+    }
+    switch (wind+(45/2))/45 {
+    case 1:
+        return "NE"
+    case 2:
+        return "E"
+    case 3:
+        return "SE"
+    case 4:
+        return "S"
+    case 5:
+        return "SW"
+    case 6:
+        return "W"
+    case 7:
+        return "W"
+    case 8:
+        return "NW"
+    default:
+        return "N"
+    }
 }

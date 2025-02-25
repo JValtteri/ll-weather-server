@@ -72,10 +72,10 @@ function populateTable(days) {
     populateRow(days, daysForecast, 'td', [str_tf(), 'Clouds','Clouds'],  "Clouds %");  // Total
                                                                                       // Layers
     populateRow(days, daysForecast, 'td', [str_tf(), 'Wind','Speed'],     "Wind");
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Wind','Deg'],       "Direction");
+    populateRow(days, daysForecast, 'td', [str_tf(), 'Wind','Dir'],       "Direction");
     populateRow(days, daysForecast, 'td', [str_tf(), 'Pressure'],         "Pressure");
     populateRow(days, daysForecast, 'td', [str_tf(), 'Humidity'],         "Humidity");
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Visibility'],       "Visibility");
+    //populateRow(days, daysForecast, 'td', [str_tf(), 'Visibility'],       "Visibility");
 }
 
 async function fetchWeatherData(cityName) {
