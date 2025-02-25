@@ -81,6 +81,20 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
             maxChance = raw_weather.List[i].Pop
         }
         rainSum += raw_weather.List[i].Rain.Mm + raw_weather.List[i].Snow.Mm
+        if i == 0 { // Make sure there is some data for first day
+            day.DayName, _        = convertTime(raw_weather.List[i].Dt)
+            day.Day.Temp          = raw_weather.List[i].Main.Temp
+            day.Day.Pressure      = raw_weather.List[i].Main.Sea_level
+            day.Day.Humidity      = raw_weather.List[i].Main.Humidity
+            day.Day.Description   = raw_weather.List[i].Weather[0].Description
+            day.Day.IconID        = raw_weather.List[i].Weather[0].Icon
+            day.Day.Clouds.Clouds = raw_weather.List[i].Clouds.All
+            day.Day.Visibility    = raw_weather.List[i].Visibility
+            day.Day.Wind.Speed    = raw_weather.List[i].Wind.Speed
+            day.Day.Wind.Deg      = raw_weather.List[i].Wind.Deg
+            day.Day.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
+            days[day_no] = day  // This should be done differently.
+        }
         if hour == 12 {
             // Populate 12:00 data
             day.DayName, _        = convertTime(raw_weather.List[i].Dt)
@@ -111,6 +125,19 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
             day.RainTotal         = rainSum
             days[day_no] = day  // This should be done differently.
             day_no += 1
+        } else if i == len(raw_weather.List)-1 && hour < 21 { // Makes sure there is some data for last night
+            day.Night.Temp          = raw_weather.List[i].Main.Temp
+            day.Night.Humidity      = raw_weather.List[i].Main.Humidity
+            day.Night.Description   = raw_weather.List[i].Weather[0].Description
+            day.Night.IconID        = raw_weather.List[i].Weather[0].Icon
+            day.Night.Clouds.Clouds = raw_weather.List[i].Clouds.All
+            day.Night.Visibility    = raw_weather.List[i].Visibility
+            day.Night.Wind.Speed    = raw_weather.List[i].Wind.Speed
+            day.Night.Wind.Deg      = raw_weather.List[i].Wind.Deg
+            day.Night.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
+            day.RainChance        = maxChance
+            day.RainTotal         = rainSum
+            days[day_no] = day  // This should be done differently.
         }
         i += 1
     }
