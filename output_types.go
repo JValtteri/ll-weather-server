@@ -16,8 +16,8 @@ type WeekWeather struct {
 
 type DayWeather struct {
     DayName    string
-    RainChance float32
-    RainTotal  float32
+    RainChance int
+    RainTotal  int
     Day        WeatherData
     Night      WeatherData
 }
@@ -41,8 +41,8 @@ type WeatherData struct {
         High   uint
     }
     Rain struct {
-        Chance float32 // %
-        Amount float32 // mm
+        Chance int // %
+        Amount int // mm
     }
     Visibility uint
     IconID     string
@@ -121,8 +121,8 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
             day.Night.Wind.Deg      = raw_weather.List[i].Wind.Deg
             day.Night.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
 
-            day.RainChance        = maxChance
-            day.RainTotal         = rainSum
+            day.RainChance        = toInt(maxChance*100)
+            day.RainTotal         = toInt(rainSum)
             days[day_no] = day  // This should be done differently.
             day_no += 1
         } else if i == len(raw_weather.List)-1 && hour < 21 { // Makes sure there is some data for last night
@@ -135,8 +135,8 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
             day.Night.Wind.Speed    = raw_weather.List[i].Wind.Speed
             day.Night.Wind.Deg      = raw_weather.List[i].Wind.Deg
             day.Night.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
-            day.RainChance        = maxChance
-            day.RainTotal         = rainSum
+            day.RainChance        = toInt(maxChance*100)
+            day.RainTotal         = toInt(rainSum)
             days[day_no] = day  // This should be done differently.
         }
         i += 1
@@ -147,7 +147,6 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
     week.Days = days
     return week
 }
-
 
 func windToStr(wind int) string {
     if wind == 0 {
@@ -173,4 +172,9 @@ func windToStr(wind int) string {
     default:
         return "N"
     }
+}
+
+func toInt(n float32) int {
+    n += 0.5
+    return int(n)
 }
