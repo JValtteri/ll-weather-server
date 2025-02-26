@@ -22,15 +22,20 @@ function str_tf() {
 /* Function to add text content to a cell
  * To be used as a parameter for populateRow()
  */
-function addText(element, text) {
+function addText(element, text, unit='') {
     element.textContent = text;
+    return element;
+}
+
+function addNum(element, num, unit='') {
+    element.textContent = `${num.toFixed(0)}${unit}`;
     return element;
 }
 
 /* Function to add an image element from data.day
  * To be used as a parameter for populateRow()
  */
-function addImage(element, dataTarget) {
+function addImage(element, dataTarget, _='') {
     let imgElm = document.createElement('img');
     imgElm.src = "img/"+dataTarget.IconID
     imgElm.alt = dataTarget.Description;
@@ -47,7 +52,7 @@ function addImage(element, dataTarget) {
  * rowTitle:    str:      A title for the row (placed in first column)
  * func:        function: a function used to add content to the created cell
  */
-function populateRow(days, table, elementType, parameters, rowTitle, func) {
+function populateRow(days, table, elementType, parameters, rowTitle, func, unit='') {
     // Create new row
     let rowElm = document.createElement('tr');
     table.appendChild(rowElm);
@@ -63,7 +68,7 @@ function populateRow(days, table, elementType, parameters, rowTitle, func) {
         for (let i = 0; i < parameters.length; ++i) {
             dataTarget = dataTarget[parameters[i]];
         }
-        element = func(columnElm, dataTarget, parameters);
+        element = func(columnElm, dataTarget, unit);
         rowElm.appendChild(element);
     });
 }
@@ -80,18 +85,18 @@ function populateRow(days, table, elementType, parameters, rowTitle, func) {
 function populateTable(days, table) {
     // Create rows and titles
     table.innerHTML = "";
-    populateRow(days, table, 'th', ['DayName'],                    "",          addText); //Day name
-    populateRow(days, table, 'td', [str_tf()],                     "",          addImage);// Icons
-    populateRow(days, table, 'td', [str_tf(), 'Description'],      "Desc.",     addText);
-    populateRow(days, table, 'td', [str_tf(), 'Temp'],             "Temp.",     addText);
-    populateRow(days, table, 'td', ['RainChance'],                 "Rain%",     addText); // Chance
-    populateRow(days, table, 'td', ['RainTotal'],                  "Rain [mm]", addText); // Total
-    populateRow(days, table, 'td', [str_tf(), 'Clouds','Clouds'],  "Clouds %",  addText); // Total
+    populateRow(days, table, 'th', ['DayName'],                    "",          addText, ''); //Day name
+    populateRow(days, table, 'td', [str_tf()],                     "",          addImage, '');// Icons
+    populateRow(days, table, 'td', [str_tf(), 'Description'],      "Desc.",     addText, '');
+    populateRow(days, table, 'td', [str_tf(), 'Temp'],             "Temp.",     addNum, '°C');
+    populateRow(days, table, 'td', ['RainChance'],                 "Rain%",     addNum, ' %'); // Chance
+    populateRow(days, table, 'td', ['RainTotal'],                  "Rain [mm]", addNum, ' mm'); // Total
+    populateRow(days, table, 'td', [str_tf(), 'Clouds','Clouds'],  "Clouds %",  addNum, ' %'); // Total
                                                                                       // Layers
-    populateRow(days, table, 'td', [str_tf(), 'Wind','Speed'],     "Wind",      addText);
-    populateRow(days, table, 'td', [str_tf(), 'Wind','Dir'],       "Direction", addText);
-    populateRow(days, table, 'td', [str_tf(), 'Pressure'],         "Pressure",  addText);
-    populateRow(days, table, 'td', [str_tf(), 'Humidity'],         "Humidity",  addText);
+    populateRow(days, table, 'td', [str_tf(), 'Wind','Speed'],     "Wind",      addNum, ' m/s');
+    populateRow(days, table, 'td', [str_tf(), 'Wind','Dir'],       "Direction", addText, '');
+    populateRow(days, table, 'td', [str_tf(), 'Pressure'],         "Pressure",  addNum, ' hPa');
+    populateRow(days, table, 'td', [str_tf(), 'Humidity'],         "Humidity",  addNum, ' %');
     //populateRow(days, table, 'td', [str_tf(), 'Visibility'],      "Visibility", addText);
 }
 
