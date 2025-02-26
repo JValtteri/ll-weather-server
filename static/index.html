@@ -7,21 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LL-Weather</title>
 </head>
-
 <body>
     <h1>Low Latency Forecast</h1>
-
         <input type="text" id="city-name" name="city-name" value="City">
         <button type="button" id="submit-button">Search</button>
-
     <button id="day-night" disabled>DAY</button>
     <br>
     <h3 id="city-name-title"></h3>
     <table id="days-forecast">
     </table>
 
-    <h3 hidden>Day</h3>
-
+    <h3 id="day-title" hidden>Day</h3>
     <table id="hours-forecast" hidden>
         <tr>
             <th></th><th>00:00</th><th>03:00</th><th>06:00</th><th>09:00</th><th>12:00</th><th>15:00</th><th>18:00</th><th>21:00</th>
@@ -30,7 +26,17 @@
 
     <br><br>
     <button id="fullscreen">Fullscreen</button>
-
-    <script src="js/script.js"></script>
+    <br>
+    <footer class="footer">
+        <div class="footer-column">
+            <h4 class="footer-title">Data Sources</h4>
+            <a href="https://openweathermap.org/api/" class="footer-text">openweathermap.org</a>
+        </div>
+        <div class="footer-column">
+            <h4 class="footer-title">Source Code</h4>
+            <a href="https://github.com/JValtteri/ll-weather-server" class="footer-text">github.com/JValtteri/ll-weather-server</a>
+        </div>
+    </footer>
 </body>
+<script src="js/script.js"></script>
 </html>

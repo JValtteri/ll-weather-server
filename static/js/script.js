@@ -136,7 +136,7 @@ submitButton.addEventListener("click", () => {
 dayButton.addEventListener("click", () => {
     console.log("Clikked");
     timeframe = (timeframe + 1) % 2     // Flip timeframe between 1 and 0 (day/night)
-    populateTable(data.Days);
+    populateTable(data.Days, daysForecast);
     if (timeframe == 1) {
         dayButton.textContent = "DAY";
     } else {

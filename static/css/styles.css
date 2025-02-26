@@ -3,7 +3,7 @@ body {
   color: #f0f0f0;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   color: #a0c0a0;
 }
 
@@ -54,4 +54,36 @@ button:disabled,
 button[disabled] {
   color: #252525;
   background-color: #606060;
+}
+
+footer {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+  font-size: 14px;
+}
+.footer-column {
+  width: 20%, 20%, 20%;
+  justify-content: center;
+  text-align: center;
+}
+
+.footer-title {
+  color: #608060;
+  margin-bottom: 0px;
+}
+
+.footer-text {
+  color: #606060;
+}
+
+@media (max-width: 500px) {
+  .footer {
+      flex-direction: column;
+      text-align: center;
+  }
+  .footer-column {
+      margin-bottom: 10px;
+      width: auto;
+  }
 }
