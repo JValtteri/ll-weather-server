@@ -38,7 +38,7 @@ func GetWeather(lat float32, lon float32) InWeatherRange {
     var raw_weather []byte = makeRequest(requestURL)
     err := json.Unmarshal(raw_weather, &weather_obj)
     if err != nil {
-        fmt.Println(err)
+        log.Println("Weather JSON Unmarshal error:", err)
     }
     return weather_obj
 }
@@ -64,7 +64,7 @@ func GetIcon(id string) []byte {
 func unmarshalCity(raw_city []byte, city_obj *InCity) {
     err := json.Unmarshal(raw_city, city_obj)
     if err != nil {
-        fmt.Println("JSON Marshal error:", err)
+        log.Println("City JSON Unmarshal error:", err)
     }
 }
 
@@ -130,7 +130,7 @@ func str_f(f float32) string {
 func unloadJSON(object any) string {
     body, err := json.Marshal(object)
     if err != nil {
-        fmt.Println(err)
+        log.Println("JSON response marshalling error:", err)
     }
     return string(body)
 }

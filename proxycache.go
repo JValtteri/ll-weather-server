@@ -28,8 +28,7 @@ func GetCityCoord(city string) (float32, float32) {
     return lat, lon
 }
 
-func GetProxyWeather(city string, mode int) (InWeatherRange, error) {
-    // MODE: 0=summary, 1=detail
+func GetProxyWeather(city string) (InWeatherRange, error) {
     var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather InWeatherRange

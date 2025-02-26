@@ -5,6 +5,7 @@ import (
     "net/http"
     "log"
     "strings"
+    "strconv"
     "encoding/json"
     "unicode"
     "unicode/utf8"
@@ -65,7 +66,7 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     var city string
     var f_obj WeekWeather
     city = sanitize(request.URL.Query().Get("name"))
-    r_obj, err := GetProxyWeather(city, 0)
+    r_obj, err := GetProxyWeather(city)
     f_obj = mapDays(r_obj)
     setCorrs(w)
     if err != nil {
@@ -76,9 +77,22 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
 }
 
 func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
-    var city string
-    city = request.URL.Query().Get("name")
-    fmt.Fprintf(w, "Detail Requested: [%s]", city)
+    var f_obj DayHours
+    var city string  = sanitize(request.URL.Query().Get("name"))
+    var dayNo string = sanitize(request.URL.Query().Get("day"))
+    var dayNumber int
+    dayNumber, err := strconv.Atoi(dayNo)
+    if err != nil {
+        http.Error(w, "400 Bad Request", http.StatusBadRequest)
+    }
+    r_obj, err := GetProxyWeather(city)
+    f_obj = mapHours(r_obj, dayNumber)
+    setCorrs(w)
+    if err != nil {
+        http.NotFound(w, request)
+    }
+    w.Header().Set("Content-Type", "application/json")
+    fmt.Fprintf(w, unloadJSON(f_obj))
 }
 
 func setCorrs(w http.ResponseWriter) {
