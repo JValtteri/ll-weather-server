@@ -9,6 +9,8 @@ const fullscreenBtn = document.getElementById('fullscreen');
 let data = null;
 let timeframe = 1;  // 1 = Day, 0 = Night
 
+/* Maps the timeframe variable to string value
+ */
 function str_tf() {
     if (timeframe=="1") {
         return "Day";
@@ -17,7 +19,35 @@ function str_tf() {
     }
 }
 
-function populateRow(days, table, elementType, parameters, rowTitle) {
+/* Function to add text content to a cell
+ * To be used as a parameter for populateRow()
+ */
+function addText(element, text) {
+    element.textContent = text;
+    return element;
+}
+
+/* Function to add an image element from data.day
+ * To be used as a parameter for populateRow()
+ */
+function addImage(element, dataTarget) {
+    let imgElm = document.createElement('img');
+    imgElm.src = "img/"+dataTarget.IconID
+    imgElm.alt = dataTarget.Description;
+    element.appendChild(imgElm);
+    return element;
+}
+
+/* Creates a new row <tr>
+ * Inputs:
+ * days:        []obj:    'day' objects
+ * table:       element:  target table element
+ * elementType: str:      the type of html element to add i.e 'tr', 'td'
+ * parameters:  []str:    containing the path from day object to chosen field
+ * rowTitle:    str:      A title for the row (placed in first column)
+ * func:        function: a function used to add content to the created cell
+ */
+function populateRow(days, table, elementType, parameters, rowTitle, func) {
     // Create new row
     let rowElm = document.createElement('tr');
     table.appendChild(rowElm);
@@ -33,51 +63,41 @@ function populateRow(days, table, elementType, parameters, rowTitle) {
         for (let i = 0; i < parameters.length; ++i) {
             dataTarget = dataTarget[parameters[i]];
         }
-        columnElm.textContent = dataTarget;
-        rowElm.appendChild(columnElm);
+        element = func(columnElm, dataTarget, parameters);
+        rowElm.appendChild(element);
     });
 }
 
-// Create Image row
-function populateImageRow(days, table, parameter, rowTitle) {
-    // Create new row
-    let rowElm = document.createElement('tr');
-    table.appendChild(rowElm);
-    // Title cells
-    let titleElm = document.createElement('td');
-    titleElm.textContent = rowTitle;
-    rowElm.appendChild(titleElm);
-    // Data cells
-    let columnElm;
-    days.forEach(day => {
-        let dataTarget = day;
-        columnElm = document.createElement('td');
-        let imgElm = document.createElement('img');
-        imgElm.src = "img/"+dataTarget[parameter].IconID
-        imgElm.alt = dataTarget[parameter].Description;
-        columnElm.appendChild(imgElm);
-        rowElm.appendChild(columnElm);
-    });
-}
-
-function populateTable(days) {
+/* Creates all new rows <tr>, by calling populateRow()
+ * Inputs:
+ * days:        []obj:    'day' objects
+ * table:       element:  target table element
+ * elementType: str:      the type of html element to add i.e 'tr', 'td'
+ * parameters:  []str:    containing the path from day object to chosen field
+ * rowTitle:    str:      A title for the row (placed in first column)
+ * func:        function: a function used to add content to the created cell
+ */
+function populateTable(days, table) {
     // Create rows and titles
-    daysForecast.innerHTML = "";
-    populateRow(days, daysForecast, 'th', ['DayName'],                  "");          //Day name
-    populateImageRow(days, daysForecast, str_tf(), "");                                         // Icons
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Description'],      "Desc.");
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Temp'],             "Temp.");
-    populateRow(days, daysForecast, 'td', ['RainChance'],                 "Rain%");     // Chance
-    populateRow(days, daysForecast, 'td', ['RainTotal'],                  "Rain [mm]"); // Total
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Clouds','Clouds'],  "Clouds %");  // Total
+    table.innerHTML = "";
+    populateRow(days, table, 'th', ['DayName'],                    "",          addText); //Day name
+    populateRow(days, table, 'td', [str_tf()],                     "",          addImage);// Icons
+    populateRow(days, table, 'td', [str_tf(), 'Description'],      "Desc.",     addText);
+    populateRow(days, table, 'td', [str_tf(), 'Temp'],             "Temp.",     addText);
+    populateRow(days, table, 'td', ['RainChance'],                 "Rain%",     addText); // Chance
+    populateRow(days, table, 'td', ['RainTotal'],                  "Rain [mm]", addText); // Total
+    populateRow(days, table, 'td', [str_tf(), 'Clouds','Clouds'],  "Clouds %",  addText); // Total
                                                                                       // Layers
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Wind','Speed'],     "Wind");
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Wind','Dir'],       "Direction");
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Pressure'],         "Pressure");
-    populateRow(days, daysForecast, 'td', [str_tf(), 'Humidity'],         "Humidity");
-    //populateRow(days, daysForecast, 'td', [str_tf(), 'Visibility'],       "Visibility");
+    populateRow(days, table, 'td', [str_tf(), 'Wind','Speed'],     "Wind",      addText);
+    populateRow(days, table, 'td', [str_tf(), 'Wind','Dir'],       "Direction", addText);
+    populateRow(days, table, 'td', [str_tf(), 'Pressure'],         "Pressure",  addText);
+    populateRow(days, table, 'td', [str_tf(), 'Humidity'],         "Humidity",  addText);
+    //populateRow(days, table, 'td', [str_tf(), 'Visibility'],      "Visibility", addText);
 }
 
+/* Makes a request for weather data and populates the table with the data
+ * cityName: str: Name of the city to search
+ */
 async function fetchWeatherData(cityName) {
     try {
         const response = await fetch(`city?name=${encodeURIComponent(cityName)}`);
@@ -87,7 +107,7 @@ async function fetchWeatherData(cityName) {
         // Enable Night button
         dayButton.removeAttribute("disabled");
         cityTitle.textContent = data.City;
-        populateTable(data.Days, timeframe);
+        populateTable(data.Days, daysForecast);
     } catch (error) {
         console.error('There has been a problem with your fetch operation:', error);
     }
