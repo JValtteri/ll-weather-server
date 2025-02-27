@@ -63,81 +63,35 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
     // Expected timeslots
     // 0 3 6 9 12 15 18 21 (24)
     var week WeekWeather
-    var hour uint = 0
     var rainSum float32
     var maxChance float32
     var i int = 0
     var day_no int = 0
-    var day DayWeather
-    var emptyDay DayWeather
+    var newDay bool = true
     days := make([]DayWeather, 5, 8)
     for i < len(raw_weather.List) {
-        if day_no == len(days) {
-            days = append(days, emptyDay)
-        }
-        day = days[day_no]
-        _, hour = convertTime(raw_weather.List[i].Dt)
+        dayName, hour := convertTime(raw_weather.List[i].Dt)
         if raw_weather.List[i].Pop > maxChance {
             maxChance = raw_weather.List[i].Pop
         }
         rainSum += raw_weather.List[i].Rain.Mm + raw_weather.List[i].Snow.Mm
-        if i == 0 { // Make sure there is some data for first day
-            day.DayName, _        = convertTime(raw_weather.List[i].Dt)
-            day.Day.Temp          = raw_weather.List[i].Main.Temp
-            day.Day.Pressure      = raw_weather.List[i].Main.Sea_level
-            day.Day.Humidity      = raw_weather.List[i].Main.Humidity
-            day.Day.Description   = raw_weather.List[i].Weather[0].Description
-            day.Day.IconID        = raw_weather.List[i].Weather[0].Icon
-            day.Day.Clouds.Clouds = raw_weather.List[i].Clouds.All
-            day.Day.Visibility    = raw_weather.List[i].Visibility
-            day.Day.Wind.Speed    = raw_weather.List[i].Wind.Speed
-            day.Day.Wind.Deg      = raw_weather.List[i].Wind.Deg
-            day.Day.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
-            days[day_no] = day  // This should be done differently.
+        if newDay {
+            // TODO: Make sure there is some data for first day
+            newDay = false
         }
         if hour == 12 {
             // Populate 12:00 data
-            day.DayName, _        = convertTime(raw_weather.List[i].Dt)
-            day.Day.Temp          = raw_weather.List[i].Main.Temp
-            day.Day.Pressure      = raw_weather.List[i].Main.Sea_level
-            day.Day.Humidity      = raw_weather.List[i].Main.Humidity
-            day.Day.Description   = raw_weather.List[i].Weather[0].Description
-            day.Day.IconID        = raw_weather.List[i].Weather[0].Icon
-            day.Day.Clouds.Clouds = raw_weather.List[i].Clouds.All
-            day.Day.Visibility    = raw_weather.List[i].Visibility
-            day.Day.Wind.Speed    = raw_weather.List[i].Wind.Speed
-            day.Day.Wind.Deg      = raw_weather.List[i].Wind.Deg
-            day.Day.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
-            days[day_no] = day  // This should be done differently.
+            days[day_no].DayName           = dayName
+            populateData(&days[day_no].Day, &raw_weather.List[i])
         } else if hour == 21 {
-            // Move index to night 22:00
-            day.Night.Temp          = raw_weather.List[i].Main.Temp
-            day.Night.Humidity      = raw_weather.List[i].Main.Humidity
-            day.Night.Description   = raw_weather.List[i].Weather[0].Description
-            day.Night.IconID        = raw_weather.List[i].Weather[0].Icon
-            day.Night.Clouds.Clouds = raw_weather.List[i].Clouds.All
-            day.Night.Visibility    = raw_weather.List[i].Visibility
-            day.Night.Wind.Speed    = raw_weather.List[i].Wind.Speed
-            day.Night.Wind.Deg      = raw_weather.List[i].Wind.Deg
-            day.Night.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
-
-            day.RainChance        = toInt(maxChance*100)
-            day.RainTotal         = toInt(rainSum)
-            days[day_no] = day  // This should be done differently.
+            // Populate 21:00 data
+            populateData(&days[day_no].Night, &raw_weather.List[i])
+            days[day_no].RainChance        = toInt(maxChance*100)
+            days[day_no].RainTotal         = toInt(rainSum)
             day_no += 1
-        } else if i == len(raw_weather.List)-1 && hour < 21 { // Makes sure there is some data for last night
-            day.Night.Temp          = raw_weather.List[i].Main.Temp
-            day.Night.Humidity      = raw_weather.List[i].Main.Humidity
-            day.Night.Description   = raw_weather.List[i].Weather[0].Description
-            day.Night.IconID        = raw_weather.List[i].Weather[0].Icon
-            day.Night.Clouds.Clouds = raw_weather.List[i].Clouds.All
-            day.Night.Visibility    = raw_weather.List[i].Visibility
-            day.Night.Wind.Speed    = raw_weather.List[i].Wind.Speed
-            day.Night.Wind.Deg      = raw_weather.List[i].Wind.Deg
-            day.Night.Wind.Dir      = windToStr(raw_weather.List[i].Wind.Deg)
-            day.RainChance        = toInt(maxChance*100)
-            day.RainTotal         = toInt(rainSum)
-            days[day_no] = day  // This should be done differently.
+            newDay = true
+        } else {
+            // TODO: Make sure there is data for last night
         }
         i += 1
     }
@@ -146,6 +100,19 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
     week.Timestamp = uint(time.Now().Unix())
     week.Days = days
     return week
+}
+
+func populateData(target *WeatherData, source *InWeather) {
+    target.Temp          = source.Main.Temp
+    target.Pressure      = source.Main.Sea_level
+    target.Humidity      = source.Main.Humidity
+    target.Description   = source.Weather[0].Description
+    target.IconID        = source.Weather[0].Icon
+    target.Clouds.Clouds = source.Clouds.All
+    target.Visibility    = source.Visibility
+    target.Wind.Speed    = source.Wind.Speed
+    target.Wind.Deg      = source.Wind.Deg
+    target.Wind.Dir      = windToStr(source.Wind.Deg)
 }
 
 func windToStr(wind int) string {
