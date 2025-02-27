@@ -47,7 +47,7 @@ Config files `key.txt` and `config.json` should be placed in the server root dir
   "CERT_FILE": "",
   "PRIVATE_KEY_FILE": "",
   "UNITS": "metric",
-  "COUNTRY": "FI",
+  "COUNTRY_CODE": "FI",
   "CACHE_AGE": 6,
   "CACHE_SIZE": 200
 }
@@ -61,7 +61,7 @@ Config files `key.txt` and `config.json` should be placed in the server root dir
 | `CERT_FILE` | `""` | Certificate file |
 | `PRIVATE_KEY_FILE` | `""` | TLS Private key file |
 | `UNITS` | `"metric"` | metric/imperial/kelvin |
-| `COUNTRY` | `"FI"` | ISO 3166 country code |
+| `COUNTRY_CODE` | `"FI"` | ISO 3166 country code |
 | `CACHE_AGE` | 6 | Max age in hours |
 | `CACHE_SIZE` | 200 | Max size |
 
