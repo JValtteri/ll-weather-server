@@ -70,13 +70,18 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
     var newDay bool = true
     days := make([]DayWeather, 5, 8)
     for i < len(raw_weather.List) {
+        if day_no == 5 {
+            break
+        }
         dayName, hour := convertTime(raw_weather.List[i].Dt)
         if raw_weather.List[i].Pop > maxChance {
             maxChance = raw_weather.List[i].Pop
         }
         rainSum += raw_weather.List[i].Rain.Mm + raw_weather.List[i].Snow.Mm
         if newDay {
-            // TODO: Make sure there is some data for first day
+            // Populate data for a day fragment
+            days[day_no].DayName           = dayName
+            populateData(&days[day_no].Day, &raw_weather.List[i])
             newDay = false
         }
         if hour == 12 {
@@ -85,6 +90,7 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
             populateData(&days[day_no].Day, &raw_weather.List[i])
         } else if hour == 21 {
             // Populate 21:00 data
+            days[day_no].DayName           = dayName
             populateData(&days[day_no].Night, &raw_weather.List[i])
             days[day_no].RainChance        = toInt(maxChance*100)
             days[day_no].RainTotal         = toInt(rainSum)
