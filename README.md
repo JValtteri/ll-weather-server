@@ -88,5 +88,8 @@ and run the binary:
 ```
 ./ll-weather-server
 ```
-
 and then run the generated executable `ll-weather-server`
+
+## Data Sources
+
+The server uses [JValtteri/weather](https://github.com/JValtteri/weather/) API Libraries to fetch weather data.
