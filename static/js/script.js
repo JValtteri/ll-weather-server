@@ -130,15 +130,18 @@ async function fetchWeatherData() {
     populateTable(weekData.Days, daysForecast, str_tf());
 }
 
+/* Sends sets the city name for weather request
+ */
 function submitCity() {
     if (cityInput.value && cityInput.value != "City") {
-        setCookie("city", cityInput.value, 30);
+        setCookie("city", base64(cityInput.value), 30);
         fetchWeatherData();
     }
 }
 
 /* Makes a request for weather data and populates the table with the data
  * cityName: str: Name of the city to search
+ * dayIndex: int: Index of the day requested
  */
 async function fetchWeatherDetail(cityName, dayIndex) {
     try {
@@ -152,9 +155,22 @@ async function fetchWeatherDetail(cityName, dayIndex) {
     }
 }
 
-function setCookie(name, value, ttl_days) {
+/* Converts str to Base64, via uint8
+*/
+function base64(str) {
+    const encoder = new TextEncoder();
+    const utf8Bytes = encoder.encode(str);
+    return base64String = btoa(String.fromCharCode(...utf8Bytes));
+}
+
+/* Creates a new cookie
+ * name: str: cookie name
+ * value: str: cookie value
+ * ttl: int: cookies time-to-live in days. leave empty for session only
+ */
+function setCookie(name, value, ttl) {
     const d = new Date();
-    d.setTime(d.getTime() + (ttl_days*24*60*60*1000));
+    d.setTime(d.getTime() + (ttl*24*60*60*1000));
     let expires = "expires="+ d.toUTCString();
     document.cookie = name + "=" + value + ";" + expires + ";SameSite=Lax" + ";path=/";
   }

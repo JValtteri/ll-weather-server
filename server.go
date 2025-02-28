@@ -8,6 +8,7 @@ import (
     "strconv"
     "unicode"
     "unicode/utf8"
+    "encoding/base64"
 )
 
 func server() {
@@ -87,7 +88,11 @@ func getCookie(request *http.Request) string {
     if err != nil {
         return ""
     }
-    return cookie.Value
+    value, err := base64.StdEncoding.DecodeString(cookie.Value)
+    if err != nil {
+        return ""
+    }
+    return string(value)
 }
 
 func setCorrs(w http.ResponseWriter) {
