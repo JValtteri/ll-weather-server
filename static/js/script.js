@@ -114,9 +114,9 @@ function populateTable(days, table, prefix) {
 /* Makes a request for weather data and populates the table with the data
  * cityName: str: Name of the city to search
  */
-async function fetchWeatherData(cityName) {
+async function fetchWeatherData() {
     try {
-        const response = await fetch(`city?name=${encodeURIComponent(cityName)}`);
+        const response = await fetch(`city`);
         if (!response.ok) throw new Error('Network response was not ok');
         weekData = await response.json();
     } catch (error) {
@@ -132,7 +132,8 @@ async function fetchWeatherData(cityName) {
 
 function submitCity() {
     if (cityInput.value && cityInput.value != "City") {
-        fetchWeatherData(cityInput.value);
+        setCookie("city", cityInput.value, 30);
+        fetchWeatherData();
     }
 }
 
@@ -141,7 +142,7 @@ function submitCity() {
  */
 async function fetchWeatherDetail(cityName, dayIndex) {
     try {
-        const response = await fetch(`city/detail?name=${encodeURIComponent(cityName)}&day=${encodeURIComponent(dayIndex)}`);
+        const response = await fetch(`city/detail?day=${encodeURIComponent(dayIndex)}`);
         console.log("Requested:", cityName)
         if (!response.ok) throw new Error('Network response was not ok');
         hourData = await response.json();
@@ -150,6 +151,13 @@ async function fetchWeatherDetail(cityName, dayIndex) {
         console.error('There has been a problem with your fetch operation:', error);
     }
 }
+
+function setCookie(name, value, ttl_days) {
+    const d = new Date();
+    d.setTime(d.getTime() + (ttl_days*24*60*60*1000));
+    let expires = "expires="+ d.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";SameSite=Lax" + ";path=/";
+  }
 
 function makeFullscreen() {
     document.querySelector("body").requestFullscreen();
@@ -287,3 +295,5 @@ daysForecast.addEventListener("click", function(event) {
         dayTitle.textContent = daysForecast.rows[0].cells[columnIndex].textContent
     }
   });
+
+fetchWeatherData();

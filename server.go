@@ -45,9 +45,11 @@ func defaultRequest(w http.ResponseWriter, request *http.Request) {
 }
 
 func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
-    var city string
     var f_obj WeekWeather
-    city = sanitize(request.URL.Query().Get("name"))
+    var city string  = sanitize(getCookie(request))
+    if city == "" {
+        return
+    }
     r_obj, err := GetProxyWeather(city)
     f_obj = mapDays(r_obj)
     setCorrs(w)
@@ -60,7 +62,10 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
 
 func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     var f_obj DayHours
-    var city string  = sanitize(request.URL.Query().Get("name"))
+    var city string  = sanitize(getCookie(request))
+    if city == "" {
+        return
+    }
     var dayNo string = sanitize(request.URL.Query().Get("day"))
     var dayNumber int
     dayNumber, err := strconv.Atoi(dayNo)
@@ -75,6 +80,14 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     }
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprintf(w, unloadJSON(f_obj))
+}
+
+func getCookie(request *http.Request) string {
+    cookie, err := request.Cookie("city")
+    if err != nil {
+        return ""
+    }
+    return cookie.Value
 }
 
 func setCorrs(w http.ResponseWriter) {
