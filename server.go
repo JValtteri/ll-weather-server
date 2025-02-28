@@ -6,31 +6,13 @@ import (
     "log"
     "strings"
     "strconv"
-    "encoding/json"
     "unicode"
     "unicode/utf8"
-    "os"
 )
-
-type Config struct {
-    ORIGIN_URL       string
-    SERVER_PORT      string
-    ENABLE_TLS       bool
-    CERT_FILE        string
-    PRIVATE_KEY_FILE string
-    UNITS            string
-    COUNTRY_CODE     string
-    CACHE_AGE        uint  // Hours
-    CACHE_SIZE       uint
-}
-
-const CONFIG_FILE string = "config.json"
-var CONFIG Config
 
 func server() {
     log.Println("Server UP")
-    loadConfig(&CONFIG)
-    LoadAPIConfig(CONFIG.UNITS, CONFIG.COUNTRY_CODE)
+    LoadConfig()
     http.HandleFunc("/", defaultRequest)
     http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./static/css"))))
     http.Handle("/js/",  http.StripPrefix("/js/",  http.FileServer(http.Dir("./static/js"))))
@@ -113,21 +95,4 @@ func sanitize(input string) string {
         }
     }
     return result.String()
-}
-
-func loadConfig(CONFIG *Config) {
-    raw_config, err := os.ReadFile(CONFIG_FILE)
-    if err != nil {
-        log.Fatal(err)
-    }
-    err = json.Unmarshal(raw_config, &CONFIG)
-    if err != nil {
-        log.Fatal(err)
-    }
-    log.Printf("Server url/port: %s:%s\n", CONFIG.ORIGIN_URL, CONFIG.SERVER_PORT)
-    if CONFIG.ENABLE_TLS {
-        log.Println("TLS is Enabled")
-    } else {
-        log.Println("HTTP-Only mode")
-    }
 }

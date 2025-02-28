@@ -5,6 +5,7 @@ import (
     "fmt"
     "log"
     "time"
+    "github.com/JValtteri/weather/owm"
 )
 
 type Coords struct {
@@ -12,7 +13,7 @@ type Coords struct {
     lon float32
 }
 
-var weatheCache map[string]InWeatherRange = make(map[string]InWeatherRange)
+var weatheCache map[string]owm.WeatherRange = make(map[string]owm.WeatherRange)
 var cityCache map[string]Coords           = make(map[string]Coords)
 var iconCache map[string][]byte           = make(map[string][]byte)
 
@@ -23,20 +24,20 @@ func GetCityCoord(city string) (float32, float32) {
     if ok {
         return lat, lon
     }
-    lat, lon = GetCity(city)                    // Make request
+    lat, lon = owm.Coord(city)                  // Make request
     addCacheCity(city, lat, lon)                // Cache coords
     return lat, lon
 }
 
-func GetProxyWeather(city string) (InWeatherRange, error) {
+func GetProxyWeather(city string) (owm.WeatherRange, error) {
     var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
-        var emptyWeather InWeatherRange
+        var emptyWeather owm.WeatherRange
         err := errors.New(fmt.Sprintf("City [%s] not found", city))
         log.Println(err)
         return emptyWeather, err
     }
-    var r_obj InWeatherRange
+    var r_obj owm.WeatherRange
     var ok bool
     r_obj, ok = searchCacheWeather(city)        // Check cache
     if ok {
@@ -44,8 +45,8 @@ func GetProxyWeather(city string) (InWeatherRange, error) {
         return r_obj, nil
     }
     log.Printf("Get weather: %s at %.3f %.3f (New request)\n", city, lat, lon)
-    r_obj = GetWeather(lat, lon)                // Make request
-    r_obj.timestamp = uint(time.Now().Unix())
+    r_obj = owm.Forecast(lat, lon)              // Make request
+    r_obj.Timestamp = uint(time.Now().Unix())
     addCacheWeather(city, r_obj)                // Cache response
     return r_obj, nil
 }
@@ -58,7 +59,7 @@ func GetProxyIcon(id string) []byte {
         return icon
     }
     log.Printf("Get new icon: %v (New request)\n", id)
-    icon = GetIcon(id)                          // Make request
+    icon = owm.Icon(id)                         // Make request
     addCacheIcon(id, icon)                      // Cache response
     return icon
 }
@@ -80,22 +81,22 @@ func searchCacheCity(key string) (float32, float32, bool) {
     return coords.lat, coords.lon, ok
 }
 
-func addCacheWeather(key string, r_obj InWeatherRange) {
+func addCacheWeather(key string, r_obj owm.WeatherRange) {
     weatheCache[key] = r_obj
 }
 
-func searchCacheWeather(key string) (InWeatherRange, bool) {
-    var r_obj InWeatherRange
+func searchCacheWeather(key string) (owm.WeatherRange, bool) {
+    var r_obj owm.WeatherRange
     var ok bool
     r_obj, ok = weatheCache[key]
     if !ok {
-        var emptyResponse InWeatherRange
+        var emptyResponse owm.WeatherRange
         return emptyResponse, false
     }
-    var tagAge uint = (uint(time.Now().Unix()) - r_obj.timestamp)
+    var tagAge uint = (uint(time.Now().Unix()) - r_obj.Timestamp)
     if tagAge > (SECONDS_IN_HOUR*CONFIG.CACHE_AGE) {
         delete(weatheCache, key)
-        var emptyResponse InWeatherRange
+        var emptyResponse owm.WeatherRange
         return emptyResponse, false
     }
     return r_obj, ok

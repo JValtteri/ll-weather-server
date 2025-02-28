@@ -7,6 +7,9 @@ package main
 import (
     "time"
     "fmt"
+    "log"
+    "encoding/json"
+    "github.com/JValtteri/weather/owm"
 )
 
 type WeekWeather struct {
@@ -70,7 +73,7 @@ func convertTime(timestamp uint) (string, uint) {
 
 /* Maps raw_weather data in to a WeekWeather struct
  */
-func mapDays(raw_weather InWeatherRange) WeekWeather {
+func mapDays(raw_weather owm.WeatherRange) WeekWeather {
     // Expected timeslots
     // 0 3 6 9 12 15 18 21 (24)
     var week WeekWeather
@@ -141,7 +144,7 @@ func mapDays(raw_weather InWeatherRange) WeekWeather {
 
 /* Maps raw_weather data in to a DayHours struct
  */
-func mapHours(raw_weather InWeatherRange, dayIndex int) DayHours {
+func mapHours(raw_weather owm.WeatherRange, dayIndex int) DayHours {
     var day_no int = 0
     hours := make([]WeatherData, 0, 8)
     for i:=0 ; i< len(raw_weather.List) ; i++ {
@@ -170,7 +173,7 @@ func mapHours(raw_weather InWeatherRange, dayIndex int) DayHours {
 
 /* Copies data from InWeather to WeatherData
  */
-func populateData(target *WeatherData, source *InWeather) {
+func populateData(target *WeatherData, source *owm.Weather) {
     target.Temp          = source.Main.Temp
     target.Pressure      = source.Main.Sea_level
     target.Humidity      = source.Main.Humidity
@@ -216,4 +219,12 @@ func windToStr(wind int) string {
 func toInt(n float32) int {
     n += 0.5
     return int(n)
+}
+
+func unloadJSON(object any) string {
+    body, err := json.Marshal(object)
+    if err != nil {
+        log.Println("JSON response marshalling error:", err)
+    }
+    return string(body)
 }
