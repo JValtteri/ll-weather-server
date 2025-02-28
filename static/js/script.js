@@ -99,15 +99,16 @@ function populateTable(days, table, prefix) {
     populateRow(days, table, 'td', [prefix],                     "",          addImage, '');// Icons
     populateRow(days, table, 'td', [prefix, 'Description'],      "Desc.",     addText, '');
     populateRow(days, table, 'td', [prefix, 'Temp'],             "Temp.",     addNum, '°C');
+    populateRow(days, table, 'td', [prefix, 'Clouds','Clouds'],  "Clouds %",  addNum, ' %'); // Total
     populateRow(days, table, 'td', [prefix, 'Rain', 'Chance'],   "Rain%",     addNum, ' %'); // Chance
     populateRow(days, table, 'td', [prefix, 'Rain', 'Amount'],   "Rain [mm]", addNum, ' mm'); // Total
-    populateRow(days, table, 'td', [prefix, 'Clouds','Clouds'],  "Clouds %",  addNum, ' %'); // Total
                                                                                       // Layers
     populateRow(days, table, 'td', [prefix, 'Wind','Speed'],     "Wind",      addNum, ' m/s');
     populateRow(days, table, 'td', [prefix, 'Wind','Dir'],       "Direction", addText, '');
-    populateRow(days, table, 'td', [prefix, 'Pressure'],         "Pressure",  addNum, ' hPa');
-    populateRow(days, table, 'td', [prefix, 'Humidity'],         "Humidity",  addNum, ' %');
+    //populateRow(days, table, 'td', [prefix, 'Pressure'],         "Pressure",  addNum, ' hPa');
+    //populateRow(days, table, 'td', [prefix, 'Humidity'],         "Humidity",  addNum, ' %');
     //populateRow(days, table, 'td', [prefix, 'Visibility'],      "Visibility", addText);
+    applyColors(table);
 }
 
 /* Makes a request for weather data and populates the table with the data
@@ -116,18 +117,17 @@ function populateTable(days, table, prefix) {
 async function fetchWeatherData(cityName) {
     try {
         const response = await fetch(`city?name=${encodeURIComponent(cityName)}`);
-        console.log("Requested:", cityName)
         if (!response.ok) throw new Error('Network response was not ok');
         weekData = await response.json();
-        dayButton.removeAttribute("disabled");      // Enables Day/Night button
-        dayTitle.setAttribute("hidden", "");        // Hide hour forecast title
-        hoursForecast.setAttribute("hidden", "");   // Hide hour forecast table
-        hoursForecast.innerHTML = "";               // Clear hour forecast table
-        cityTitle.textContent = weekData.City;
-        populateTable(weekData.Days, daysForecast, str_tf());
     } catch (error) {
         console.error('There has been a problem with your fetch operation:', error);
     }
+    dayButton.removeAttribute("disabled");      // Enables Day/Night button
+    dayTitle.setAttribute("hidden", "");        // Hide hour forecast title
+    hoursForecast.setAttribute("hidden", "");   // Hide hour forecast table
+    hoursForecast.innerHTML = "";               // Clear hour forecast table
+    cityTitle.textContent = weekData.City;
+    populateTable(weekData.Days, daysForecast, str_tf());
 }
 
 function submitCity() {
@@ -155,13 +155,96 @@ function makeFullscreen() {
     document.querySelector("body").requestFullscreen();
 }
 
+/*
+ * Color highlights
+ */
+
+
+function colorTemp(element) {
+    let value = parseInt(element.textContent.split('°')[0]);
+    if (value > 20) {
+        element.classList.add('hot')
+    } else if (value < -20) {
+        element.classList.add('arctic')
+    }
+}
+
+function colorCloud(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value > 50) {
+        element.classList.add('broken-clouds')
+    } else if (value > 10) {
+        element.classList.add('clear-sky')
+    }
+}
+
+function colorRainChance(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value > 70) {
+        element.classList.add('medium')
+    } else if (value > 19) {
+        element.classList.add('light')
+    }
+}
+
+function colorRain(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value > 3) {
+        element.classList.add('heavy')
+    } else if (value > 1) {
+        element.classList.add('medium')
+    } else if (value > 0) {
+        element.classList.add('light')
+    }
+}
+
+function colorWind(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value >= 15) {
+        element.classList.add('heavy')
+    } else if (value > 9) {
+        element.classList.add('medium')
+    } else if (value >= 4) {
+        element.classList.add('light')
+    }
+}
+
+/* Apply color to a row.
+ * table: target table
+ * row: index of the target row
+ * func: function to run on each cell
+ */
+function applyColorRow(table, row, func) {
+    let target = table.rows[row];
+    target.childNodes.forEach(cell => {
+        func(cell);
+    });
+}
+
+/*
+ * Applies highlight colors to an entire table
+ */
+function applyColors(table) {
+    applyColorRow(table, 3, colorTemp);
+    applyColorRow(table, 4, colorCloud);
+    applyColorRow(table, 5, colorRainChance);
+    applyColorRow(table, 6, colorRain);
+    applyColorRow(table, 7, colorWind);
+}
+
+/*
+ * Buttons
+ */
+
+/* Submit button
+ */
 submitButton.addEventListener("click", () => {
-    console.log("Clikked");
     submitCity();
 });
 
+/* Day/Night button
+ */
 dayButton.addEventListener("click", () => {
-    console.log("Clikked");
     timeframe = (timeframe + 1) % 2     // Flip timeframe between 1 and 0 (day/night)
     populateTable(weekData.Days, daysForecast, str_tf());
     if (timeframe == 1) {
@@ -171,22 +254,29 @@ dayButton.addEventListener("click", () => {
     }
 });
 
+/* Clear input on click
+ */
 cityInput.addEventListener("click", () => {
     cityInput.value = "";
 });
 
+/* Search on Enter key
+ */
 cityInput.addEventListener('keydown', (event) => {
     if (event.key === "Enter") {
         submitCity();
     }
 });
 
+/* Set to fullscreen
+ */
 fullscreenBtn.addEventListener("click", () => {
     makeFullscreen();
 })
 
-
-// Handle a click on a day
+/* Handle a click on a day
+ * Opens detail view
+ */
 daysForecast.addEventListener("click", function(event) {
     if (event.target.tagName === "TH" || event.target.tagName === "TD") {
         const columnIndex = Array.from(event.target.parentElement.cells).indexOf(event.target);
