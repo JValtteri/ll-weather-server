@@ -11,6 +11,9 @@ import (
     "encoding/base64"
 )
 
+var rqNum uint = 0
+var uniqRqNum uint = 0
+
 func server() {
     log.Println("Server UP")
     LoadConfig()
@@ -30,6 +33,7 @@ func server() {
 }
 
 func defaultRequest(w http.ResponseWriter, request *http.Request) {
+    rqNum++
     var path []string = strings.Split(request.URL.Path, "/")
     if path[1] == "img" {
         var id string   = sanitize(path[2])
@@ -46,6 +50,7 @@ func defaultRequest(w http.ResponseWriter, request *http.Request) {
 }
 
 func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
+    rqNum++
     var f_obj WeekWeather
     var city string  = sanitize(getCookie(request))
     if city == "" {
@@ -62,6 +67,7 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
 }
 
 func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
+    rqNum++
     var f_obj DayHours
     var city string  = sanitize(getCookie(request))
     if city == "" {
@@ -92,7 +98,8 @@ func getCookie(request *http.Request) string {
     if err != nil {
         return ""
     }
-    return string(value)
+    city := strings.TrimSpace(string(value))
+    return city
 }
 
 func setCorrs(w http.ResponseWriter) {

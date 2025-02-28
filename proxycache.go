@@ -33,7 +33,7 @@ func GetProxyWeather(city string) (owm.WeatherRange, error) {
     var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather owm.WeatherRange
-        err := errors.New(fmt.Sprintf("City [%s] not found", city))
+        err := errors.New(fmt.Sprintf("r:%4vu:%4v: City [%s] not found", rqNum, uniqRqNum, city))
         log.Println(err)
         return emptyWeather, err
     }
@@ -41,10 +41,11 @@ func GetProxyWeather(city string) (owm.WeatherRange, error) {
     var ok bool
     r_obj, ok = searchCacheWeather(city)        // Check cache
     if ok {
-        log.Printf("Get weather: %s at %.3f %.3f\n", city, lat, lon)
+        log.Printf("r:%4v u:%4v: Get weather: %s at %.3f %.3f\n", rqNum, uniqRqNum, city, lat, lon)
         return r_obj, nil
     }
-    log.Printf("Get weather: %s at %.3f %.3f (New request)\n", city, lat, lon)
+    uniqRqNum++
+    log.Printf("r:%4v u:%4v: Get weather: %s at %.3f %.3f (New request)\n", rqNum, uniqRqNum, city, lat, lon)
     r_obj = owm.Forecast(lat, lon)              // Make request
     r_obj.Timestamp = uint(time.Now().Unix())
     addCacheWeather(city, r_obj)                // Cache response
@@ -58,7 +59,8 @@ func GetProxyIcon(id string) []byte {
     if ok {
         return icon
     }
-    log.Printf("Get new icon: %v (New request)\n", id)
+    uniqRqNum++
+    log.Printf("r:%4v u:%4v: Get new icon: %v (New request)\n", rqNum, uniqRqNum, id)
     icon = owm.Icon(id)                         // Make request
     addCacheIcon(id, icon)                      // Cache response
     return icon
