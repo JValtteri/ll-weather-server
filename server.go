@@ -33,7 +33,6 @@ func server() {
 }
 
 func defaultRequest(w http.ResponseWriter, request *http.Request) {
-    rqNum++
     var path []string = strings.Split(request.URL.Path, "/")
     if path[1] == "img" {
         var id string   = sanitize(path[2])
