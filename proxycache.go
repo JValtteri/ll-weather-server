@@ -13,7 +13,7 @@ type Coords struct {
     lon float32
 }
 
-var weatheCache map[string]owm.WeatherRange = make(map[string]owm.WeatherRange)
+var weatherCache map[string]owm.WeatherRange = make(map[string]owm.WeatherRange)
 var cityCache map[string]Coords           = make(map[string]Coords)
 var iconCache map[string][]byte           = make(map[string][]byte)
 
@@ -85,20 +85,20 @@ func searchCacheCity(key string) (float32, float32, bool) {
 }
 
 func addCacheWeather(key string, r_obj owm.WeatherRange) {
-    weatheCache[key] = r_obj
+    weatherCache[key] = r_obj
 }
 
 func searchCacheWeather(key string) (owm.WeatherRange, bool) {
     var r_obj owm.WeatherRange
     var ok bool
-    r_obj, ok = weatheCache[key]
+    r_obj, ok = weatherCache[key]
     if !ok {
         var emptyResponse owm.WeatherRange
         return emptyResponse, false
     }
     var tagAge uint = (uint(time.Now().Unix()) - r_obj.Timestamp)
     if tagAge > (SECONDS_IN_HOUR*CONFIG.CACHE_AGE) {
-        delete(weatheCache, key)
+        delete(weatherCache, key)
         var emptyResponse owm.WeatherRange
         return emptyResponse, false
     }
