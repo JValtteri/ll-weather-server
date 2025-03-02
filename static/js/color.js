@@ -10,7 +10,7 @@ function colorTemp(element) {
     } else if (value < -20) {
         element.classList.add('arctic')
     } else if (value < 0) {
-        element.classList.add('light')
+        element.classList.add('cold')
     }
 }
 
