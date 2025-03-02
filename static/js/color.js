@@ -5,10 +5,12 @@
 
 function colorTemp(element) {
     let value = parseInt(element.textContent.split('°')[0]);
-    if (value > 20) {
+    if (value > 23) {
         element.classList.add('hot')
     } else if (value < -20) {
         element.classList.add('arctic')
+    } else if (value < 0) {
+        element.classList.add('light')
     }
 }
 

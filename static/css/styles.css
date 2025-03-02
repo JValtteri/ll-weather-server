@@ -126,29 +126,33 @@ footer {
 }
 
 .light {
-  background-color: rgb(82, 114, 173) !important;
+  background-color: #5272ad !important;
 }
 
 .medium {
-  background-color: rgb(52, 84, 143) !important;
+  background-color: #34548f !important;
 }
 
 .heavy {
-  background-color: rgb(32, 64, 123) !important;
+  background-color: #20407b !important;
 }
 
 .hot {
-  background-color: rgb(88, 42, 23) !important;
+  background-color: #782818 !important;
+}
+
+.cold {
+  background-color: #707898 !important;
 }
 
 .arctic {
-  background-color: rgb(25, 88, 97) !important;
+  background-color: #74a1cf !important;
 }
 
 .clear-sky {
-  background-color: rgb(64, 141, 131) !important;
+  background-color: #408d83 !important;
 }
 
 .broken-clouds {
-  background-color: rgb(27, 77, 70) !important;
+  background-color: #1b4d46 !important;
 }
