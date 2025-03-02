@@ -16,7 +16,7 @@ type Config struct {
     UNITS            string
     COUNTRY_CODE     string
     CACHE_AGE        uint  // Hours
-    CACHE_SIZE       uint
+    CACHE_SIZE       int
     NETWORK          bool
 }
 

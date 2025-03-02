@@ -71,7 +71,12 @@ func addCacheCity(key string, lat, lon float32) {
     var coords Coords
     coords.lat = lat
     coords.lon = lon
-    cityCache[key] = coords
+    if len(cityCache) < CONFIG.CACHE_SIZE {
+        cityCache[key] = coords
+    } else {
+        cullMap(&cityCache)
+        cityCache[key] = coords
+    }
 }
 
 func searchCacheCity(key string) (float32, float32, bool) {
@@ -85,7 +90,23 @@ func searchCacheCity(key string) (float32, float32, bool) {
 }
 
 func addCacheWeather(key string, r_obj owm.WeatherRange) {
-    weatherCache[key] = r_obj
+    if len(weatherCache) < CONFIG.CACHE_SIZE {
+        weatherCache[key] = r_obj
+    } else {
+        cullMap(&weatherCache)
+        weatherCache[key] = r_obj
+    }
+}
+
+// Throws away half (every 2nd) item of a given map
+func cullMap[V Coords | owm.WeatherRange | []byte ](m *map[string]V) {
+    var i int = 0
+    for key, _ := range *m {
+        if i == 0 {
+            delete(*m, key)
+        }
+        i = (i + 1) % 2
+    }
 }
 
 func searchCacheWeather(key string) (owm.WeatherRange, bool) {
@@ -93,20 +114,23 @@ func searchCacheWeather(key string) (owm.WeatherRange, bool) {
     var ok bool
     r_obj, ok = weatherCache[key]
     if !ok {
-        var emptyResponse owm.WeatherRange
-        return emptyResponse, false
+        return owm.WeatherRange{}, false
     }
     var tagAge uint = (uint(time.Now().Unix()) - r_obj.Timestamp)
     if tagAge > (SECONDS_IN_HOUR*CONFIG.CACHE_AGE) {
         delete(weatherCache, key)
-        var emptyResponse owm.WeatherRange
-        return emptyResponse, false
+        return r_obj, false
     }
     return r_obj, ok
 }
 
 func addCacheIcon(key string, data []byte) {
-    iconCache[key] = data
+    if len(iconCache) < CONFIG.CACHE_SIZE {
+        iconCache[key] = data
+    } else {
+        cullMap(&iconCache)
+        iconCache[key] = data
+    }
 }
 
 func searchCacheIcon(key string) ([]byte, bool) {

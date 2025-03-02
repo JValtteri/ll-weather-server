@@ -11,6 +11,10 @@ func setup() {
     CONFIG.CACHE_AGE = 1
     CONFIG.NETWORK = false
     owm.Config("", "", "", false)  // Prevent requests
+    // Clear out previous data from cache
+    weatherCache = make(map[string]owm.WeatherRange)
+    cityCache   = make(map[string]Coords)
+    iconCache   = make(map[string][]byte)
 }
 
 func TestAddCityCache(t *testing.T) {
@@ -74,16 +78,17 @@ func TestAddWeatherCache(t *testing.T) {
     addCacheWeather("2nd", obj2)
     var obj3 owm.WeatherRange
     obj3.Timestamp = 0
-    obj3.City.Id = 231
-    addCacheWeather("2nd", obj3)
+    obj3.City.Id = 333
+    addCacheWeather("3rd", obj3)
     fob, ok := searchCacheWeather("1st")
     if fob.City.Id != obj1.City.Id || !ok {
         t.Errorf("WeatherCache 1st not found, %v != %v, ok:%v", fob.City.Id, obj1.City.Id, ok)
     }
     fob, ok = searchCacheWeather("2nd")
     if fob.City.Id != obj2.City.Id || !ok {
-        t.Errorf("WeatherCache 2nd not found %v != %v, ok:%v", fob.City.Id, obj1.City.Id, ok)
+        t.Errorf("WeatherCache 2nd not found %v != %v, ok:%v", fob.City.Id, obj2.City.Id, ok)
     }
+    fob, ok = searchCacheWeather("3rd")
     if ok {
         t.Errorf("WeatherCache violated CACHE_AGE")
     }
