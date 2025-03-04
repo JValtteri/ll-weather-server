@@ -19,6 +19,10 @@ table {
   border-collapse: collapse;
 }
 
+.table-container {
+  overflow-x: scroll;
+}
+
 th, td {
   border: 1px solid #000000;
   padding: 8px;
@@ -40,10 +44,6 @@ tr:nth-child(odd) {
 
 th {
   background-color: #309050;
-}
-
-p {
-
 }
 
 input {
