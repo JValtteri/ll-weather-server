@@ -9,8 +9,9 @@ import (
 func setup() {
     CONFIG.CACHE_SIZE = 5
     CONFIG.CACHE_AGE = 1
-    CONFIG.NETWORK = false
-    owm.Config("", "", "", false)  // Prevent requests
+    // Prevent requests
+    owm.Config("", "", "")
+    owm.API_CONFIG.NETWORK = false
     // Clear out previous data from cache
     weatherCache = make(map[string]owm.WeatherRange)
     cityCache   = make(map[string]Coords)
