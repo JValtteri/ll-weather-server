@@ -8,74 +8,76 @@
     <title>LL-Weather</title>
 </head>
 <body>
-    <h1>Low Latency Forecast</h1>
-        <input type="text" id="city-name" name="city-name" value="City">
-        <button type="button" id="submit-button">Search</button>
-    <button id="day-night" disabled>DAY</button>
-    <br>
-    <h2 id="city-name-title"></h2>
-    <div class="table-container">
-        <table id="days-forecast">
-        </table>
-    </div>
-    <h3 id="day-title" hidden>Day</h3>
-    <div class="table-container">
-        <table id="hours-forecast" hidden>
-            <tr>
-                <th></th><th>00:00</th><th>03:00</th><th>06:00</th><th>09:00</th><th>12:00</th><th>15:00</th><th>18:00</th><th>21:00</th>
-            </tr>
-        </table>
-    </div>
-    <br><br>
-    <button id="fullscreen">Fullscreen</button>
-    <br>
-    <footer class="footer">
-        <div class="footer-column">
-            <h4 class="footer-title">Data Sources</h4>
-            <a href="https://openweathermap.org/api/" class="footer-text">openweathermap.org</a>
+    <div class="vertical-scroll">
+        <h1>Low Latency Forecast</h1>
+            <input type="text" id="city-name" name="city-name" value="City">
+            <button type="button" id="submit-button">Search</button>
+        <button id="day-night" disabled>DAY</button>
+        <br>
+        <h2 id="city-name-title"></h2>
+        <div class="table-container">
+            <table id="days-forecast">
+            </table>
         </div>
-        <div class="footer-column">
-            <h4 class="footer-title">Source Code</h4>
-            <a href="https://github.com/JValtteri/ll-weather-server" class="footer-text">github.com/JValtteri/ll-weather-server</a>
+        <h3 id="day-title" hidden>Day</h3>
+        <div class="table-container">
+            <table id="hours-forecast" hidden>
+                <tr>
+                    <th></th><th>00:00</th><th>03:00</th><th>06:00</th><th>09:00</th><th>12:00</th><th>15:00</th><th>18:00</th><th>21:00</th>
+                </tr>
+            </table>
         </div>
-        <div class="footer-column">
-            <h4 class="footer-title">Data Retention</h4>
-            <input type="checkbox" id="accept">Remember Me
-            <div class="tooltip">
-                <span class="tooltip-trigger footer-text">Tell me more</span>
-                <div class="tooltiptext">
-                    <p>
-                        By checking the box "Remember Me", you allow your browser
-                        to automatically repeat your last search when you return.
-                    </p>
-                    <p>
-                        This is done by storing a cookie containing the name of the city
-                        on your system. When you return to this site, your browser will send
-                        the name of the city, and the server responds with a forecast.
-                    </p>
-                    <p>
-                        No identifiable information is stored. Only the necessary
-                        data to serve you the forecast you want.
-                    </p>
-                    <p>
-                        The cookie will be stored for a maximum of 30 days.
-                    </p>
-                    <p>
-                        You can remove your cookie consent any time by unchecking the
-                        "Remember Me" checkbox or clearing the cookies through your browser.
-                    </p>
-                    <p>
-                        The server collects anonymous statistics on requests made to follow the
-                        load on the server and to diagnose any problems. Logs disappear on every
-                        server restart.
-                    </p>
-
-                </div>
+        <br><br>
+        <button id="fullscreen">Fullscreen</button>
+        <br>
+        <footer class="footer">
+            <div class="footer-column">
+                <h4 class="footer-title">Data Sources</h4>
+                <a href="https://openweathermap.org/api/" class="footer-text">openweathermap.org</a>
             </div>
-            <p>
-            </p>
-        </div>
-    </footer>
+            <div class="footer-column">
+                <h4 class="footer-title">Source Code</h4>
+                <a href="https://github.com/JValtteri/ll-weather-server" class="footer-text">github.com/JValtteri/ll-weather-server</a>
+            </div>
+            <div class="footer-column">
+                <h4 class="footer-title">Data Retention</h4>
+                <input type="checkbox" id="accept">Remember Me
+                <div class="tooltip">
+                    <span class="tooltip-trigger footer-text">Tell me more</span>
+                    <div class="tooltiptext">
+                        <p>
+                            By checking the box "Remember Me", you allow your browser
+                            to automatically repeat your last search when you return.
+                        </p>
+                        <p>
+                            This is done by storing a cookie containing the name of the city
+                            on your system. When you return to this site, your browser will send
+                            the name of the city, and the server responds with a forecast.
+                        </p>
+                        <p>
+                            No identifiable information is stored. Only the necessary
+                            data to serve you the forecast you want.
+                        </p>
+                        <p>
+                            The cookie will be stored for a maximum of 30 days.
+                        </p>
+                        <p>
+                            You can remove your cookie consent any time by unchecking the
+                            "Remember Me" checkbox or clearing the cookies through your browser.
+                        </p>
+                        <p>
+                            The server collects anonymous statistics on requests made to follow the
+                            load on the server and to diagnose any problems. Logs disappear on every
+                            server restart.
+                        </p>
+
+                    </div>
+                </div>
+                <p>
+                </p>
+            </div>
+        </footer>
+    </div>
 </body>
 <script type="module" src="js/script.js"></script>
 </html>
