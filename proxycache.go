@@ -40,7 +40,7 @@ func GetProxyWeather(city string) (owm.WeatherRange, error) {
     var r_obj owm.WeatherRange
     var ok bool
     r_obj, ok = searchCacheWeather(city)        // Check cache
-    if ok {
+    if ok || f_obj.Code == 1  {
         log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f\n", rqNum, uniqRqNum, city, lat, lon)
         return r_obj, nil
     }

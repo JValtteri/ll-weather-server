@@ -15,6 +15,7 @@ import (
 type WeekWeather struct {
     City      string
     Timestamp uint
+    Code      int           // 0=normal, 1=old, -1=not found
     Days      []DayWeather
 }
 
@@ -27,6 +28,7 @@ type DayWeather struct {
 type DayHours struct {
     City      string
     Timestamp uint
+    Code      int           // 0=normal, 1=old, -1=not found
     Hours     []WeatherData
 }
 
