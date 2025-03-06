@@ -1,6 +1,6 @@
 # Low Latency Weather Server
 
-[![Go Build and Test](https://github.com/JValtteri/ll-weather-server/actions/workflows/name:%20go-test.yaml/badge.svg)](https://github.com/JValtteri/ll-weather-server/actions/workflows/name:%20go-test.yaml)
+[![Backend Tests](https://github.com/JValtteri/ll-weather-server/actions/workflows/go-test.yaml/badge.svg)](https://github.com/JValtteri/ll-weather-server/actions/workflows/go-test.yaml)
 
 A weather forecast web app with a **Go** backend.
 
