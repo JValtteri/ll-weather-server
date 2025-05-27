@@ -64,12 +64,22 @@ button {
   color: #f0f0f0;
   border-radius: 6px;
   padding: 5px;
+  height: 35px;
+  padding-inline: 8px;
 }
 
 button:disabled,
 button[disabled] {
   color: #252525;
   background-color: #606060;
+}
+
+.top-ui {
+  display: flex;
+}
+.top-column {
+  padding: 2px;
+  padding-right: 20px;
 }
 
 footer {
@@ -99,6 +109,13 @@ footer {
       text-align: center;
   }
   .footer-column {
+      margin-bottom: 10px;
+      width: auto;
+  }
+  .top-ui {
+      flex-direction: column;
+  }
+  .top-column {
       margin-bottom: 10px;
       width: auto;
   }

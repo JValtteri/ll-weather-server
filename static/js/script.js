@@ -1,6 +1,7 @@
 import * as table from "./table.js"
 import * as cookie from "./cookie.js"
 
+const body          = document.getElementById('body');
 // Inputs
 const cityInput     = document.getElementById('city-name');
 const cookieConsent = document.getElementById('accept');
@@ -32,7 +33,7 @@ function str_tf() {
 }
 
 /* Converts str to Base64, via uint8
-*/
+ */
 function base64(str) {
     const encoder = new TextEncoder();
     const utf8Bytes = encoder.encode(str);
@@ -53,6 +54,7 @@ async function fetchWeatherData() {
         console.error('There has been a problem with your fetch operation:', error);
     }
     dayButton.removeAttribute("disabled");      // Enables Day/Night button
+    reloadBtn.removeAttribute("disabled");      // Enables Reload button
     dayTitle.setAttribute("hidden", "");        // Hide hour forecast title
     hoursForecast.setAttribute("hidden", "");   // Hide hour forecast table
     hoursForecast.innerHTML = "";               // Clear hour forecast table
@@ -88,8 +90,23 @@ async function fetchWeatherDetail(cityName, dayIndex) {
     }
 }
 
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        makeFullscreen();
+    } else {
+        document.exitFullscreen();
+        if (cookieConsent.checked === true) {
+            cookie.setCookie("fullscreen", "");
+        }
+    }
+}
+
 function makeFullscreen() {
-    document.querySelector("body").requestFullscreen();
+    document.querySelector("body").requestFullscreen()
+                                  .catch((TypeError) => {});
+    if (cookieConsent.checked === true) {
+        cookie.setCookie("fullscreen", "true", ttl*DAY);
+    }
 }
 
 /*
@@ -100,10 +117,17 @@ function makeFullscreen() {
 const submitButton  = document.getElementById("submit-button");
 const dayButton     = document.getElementById("day-night");
 const fullscreenBtn = document.getElementById('fullscreen');
+const reloadBtn     = document.getElementById('reload');
 
 /* Submit button
  */
 submitButton.addEventListener("click", () => {
+    submitCity();
+});
+
+/* Reload button
+ */
+reloadBtn.addEventListener("click", () => {
     submitCity();
 });
 
@@ -142,21 +166,37 @@ cookieConsent.addEventListener('click', () => {
     } else {
         cookie.setCookie("city", "");       // Cookie is set as session cookie, so the browser should remove it after the session
         cookie.setCookie("consent", "");
+        cookie.setCookie("fullscreen", "");
     }
 });
 
-/* Set to fullscreen
+/* "Fullscreen" clicked
  */
 fullscreenBtn.addEventListener("click", () => {
-    makeFullscreen();
+    toggleFullscreen();
 })
+
+/* Clicked anywhere on document
+ */
+body.addEventListener("click", () => {
+     if (cookieConsent.checked) {
+        if (cookie.getCookie("fullscreen") === "true" ) {
+            makeFullscreen();
+        }
+    }
+});
 
 /* Click on a day
  * Opens detail view
  */
 daysForecast.addEventListener("click", function(event) {
     if (event.target.tagName === "TH" || event.target.tagName === "TD") {
-        const columnIndex = Array.from(event.target.parentElement.cells).indexOf(event.target);
+        var target = event.target;
+    } else if (event.target.tagName === "IMG" || event.target.tagName === "TD") {
+        var target = event.target.parentElement;
+    }
+    const columnIndex = Array.from(target.parentElement.cells).indexOf(target);
+    if (columnIndex != 0) {
         fetchWeatherDetail(cityTitle.textContent, columnIndex-1);
         hoursForecast.removeAttribute("hidden");
         dayTitle.removeAttribute("hidden");
@@ -171,6 +211,9 @@ if (cookie.getCookie("consent") === "true" ) {
 
 // Auto search if concented
 if (cookieConsent.checked) {
+    if (cookie.getCookie("fullscreen") === "true" ) {
+        makeFullscreen();
+    }
     cookieConsent.checked = true;
     fetchWeatherData();
 }

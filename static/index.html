@@ -7,12 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LL-Weather</title>
 </head>
-<body>
+<body id="body">
     <div class="vertical-scroll">
         <h1>Low Latency Forecast</h1>
-            <input type="text" id="city-name" name="city-name" value="City">
-            <button type="button" id="submit-button">Search</button>
-        <button id="day-night" disabled>DAY</button>
+        <div class="top-ui">
+            <div class="top-column">
+                <input type="text" id="city-name" name="city-name" value="City">
+                <button type="button" id="submit-button">Search</button>
+            </div>
+            <div class="top-column">
+                <button id="day-night" disabled>DAY</button>
+                <button id="reload" disabled>Reload</button>
+                <button id="fullscreen">Fullscreen</button>
+            </div>
+        </div>
         <br>
         <h2 id="city-name-title"></h2>
         <div class="table-container">
@@ -27,8 +35,6 @@
                 </tr>
             </table>
         </div>
-        <br><br>
-        <button id="fullscreen">Fullscreen</button>
         <br>
         <footer class="footer">
             <div class="footer-column">
@@ -70,7 +76,6 @@
                             load on the server and to diagnose any problems. Logs disappear on every
                             server restart.
                         </p>
-
                     </div>
                 </div>
                 <p>
