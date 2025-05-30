@@ -76,3 +76,12 @@ export function applyColors(table) {
     applyColorRow(table, 6, colorRain);
     applyColorRow(table, 7, colorWind);
 }
+
+export function colorSun(element, sunUp) {
+    if (!sunUp) {
+        element.classList.add('night');
+    } else {
+        element.classList.remove('night');   // This should be unnecessary
+    }
+}
+

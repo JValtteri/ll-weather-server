@@ -57,33 +57,35 @@ type WeatherData struct {
     SunUp      bool
 }
 
-const REFERENCE_TIME uint = 1740096000
+const REFERENCE_TIME uint = 1740096000  // UTC (+0:00)
 const SECONDS_IN_DAY uint = 86400;
 const SECONDS_IN_HOUR uint = 3600;
+var DT_OFFSET int = 0;
 
-/* Converts Posix timestamp to
+/* Converts Posix timestamp and time offset (timezone) to
  * dayname string
  * hour uint
  */
 func convertTime(timestamp uint) (string, uint) {
-    calibratedTime := timestamp - REFERENCE_TIME
-    hour := (calibratedTime % SECONDS_IN_DAY) / SECONDS_IN_HOUR
+    calibratedTime := int(timestamp) - int(REFERENCE_TIME) + DT_OFFSET
+    hour := (calibratedTime % int(SECONDS_IN_DAY)) / int(SECONDS_IN_HOUR)
     // dayname calculation is offset by three hours and one second 3:00:01, to make
     // 00:00 day is counted as part of previous day, not the next
     dayname := time.Unix(int64( timestamp - ( SECONDS_IN_HOUR * 3 ) - 1 ), 0).Weekday().String()
-    return dayname, hour
+    return dayname, uint(hour)
 }
 
 /* Maps raw_weather data in to a WeekWeather struct
  */
 func mapDays(raw_weather owm.WeatherRange) WeekWeather {
     // Expected timeslots
-    // 0 3 6 9 12 15 18 21 (24)
+    // 3 6 9 12 15 18 21 (24/0)
     var week WeekWeather
     var rainSum float32
     var maxChance float32
     var day_no int = 0
     var newDay bool = true
+    DT_OFFSET = raw_weather.City.Timezone       // Update tiemzone offset
     days := make([]DayWeather, 5, 8)
     for i:=0 ; i<len(raw_weather.List) ; i++ {
         if day_no == 5 {
@@ -105,7 +107,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Day.Title         = dayName
             days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
             days[day_no].Day.Rain.Amount   = rainSum
-            days[day_no].Day.SunUp         = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
+            days[day_no].Day.SunUp         = true
             populateData(&days[day_no].Day, &raw_weather.List[i])
             newDay = false
 
@@ -116,7 +118,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Day.Title         = dayName
             days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
             days[day_no].Day.Rain.Amount   = rainSum
-            days[day_no].Day.SunUp         = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
+            days[day_no].Day.SunUp         = true
             populateData(&days[day_no].Day, &raw_weather.List[i])
         } else if hour == 15 {
             // Set final day rain
@@ -131,7 +133,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Night.Title       = dayName
             days[day_no].Night.Rain.Chance = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount = rainSum
-            days[day_no].Day.SunUp         = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
+            days[day_no].Night.SunUp       = false
             populateData(&days[day_no].Night, &raw_weather.List[i])
             days[day_no].Night.Rain.Chance       = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount       = rainSum
@@ -140,7 +142,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Night.Title       = dayName
             days[day_no].Night.Rain.Chance = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount = rainSum
-            days[day_no].Day.SunUp         = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
+            days[day_no].Night.SunUp       = false
             populateData(&days[day_no].Night, &raw_weather.List[i])
             days[day_no].Night.Rain.Chance       = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount       = rainSum
@@ -169,7 +171,7 @@ func mapHours(raw_weather owm.WeatherRange, dayIndex int) DayHours {
             hourData.Title = fmt.Sprintf("%v:00", hour)
             hourData.Rain.Chance = toInt(raw_weather.List[i].Pop*100)
             hourData.Rain.Amount = raw_weather.List[i].Rain.Mm + raw_weather.List[i].Snow.Mm
-            hourData.SunUp = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
+            hourData.SunUp = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&hourData, &raw_weather.List[i])
             hours = append(hours, hourData)
             if hour == 0 {
@@ -187,18 +189,16 @@ func mapHours(raw_weather owm.WeatherRange, dayIndex int) DayHours {
     return day
 }
 
-/* Returns bool true, if sun is up at timestamp.
+/* Returns bool true, if The Sun is up at given hour.
  */
-func sunUp(timestamp uint, hour uint, sunrise uint, sunset uint) bool {
-    if hour == 0 {
-        return timestamp < sunset
-    } else if hour <= 12 {
-        return timestamp > sunrise
-    } else {
-        return timestamp < sunset
+func sunUp(hour uint, sunrise_dt uint, sunset_dt uint) bool {
+    _, sunrise := convertTime(sunrise_dt)
+    _, sunset := convertTime(sunset_dt)
+    if sunset == 0 {
+        sunset = 24
     }
+    return sunrise < hour && hour < sunset
 }
-
 
 /* Copies data from InWeather to WeatherData
  */
