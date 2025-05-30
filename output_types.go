@@ -54,6 +54,7 @@ type WeatherData struct {
     }
     Visibility uint
     IconID     string
+    SunUp      bool
 }
 
 const REFERENCE_TIME uint = 1740096000
@@ -67,7 +68,9 @@ const SECONDS_IN_HOUR uint = 3600;
 func convertTime(timestamp uint) (string, uint) {
     calibratedTime := timestamp - REFERENCE_TIME
     hour := (calibratedTime % SECONDS_IN_DAY) / SECONDS_IN_HOUR
-    dayname := time.Unix(int64(timestamp), 0).Weekday().String()
+    // dayname calculation is offset by three hours and one second 3:00:01, to make
+    // 00:00 day is counted as part of previous day, not the next
+    dayname := time.Unix(int64( timestamp - ( SECONDS_IN_HOUR * 3 ) - 1 ), 0).Weekday().String()
     return dayname, hour
 }
 
@@ -102,6 +105,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Day.Title         = dayName
             days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
             days[day_no].Day.Rain.Amount   = rainSum
+            days[day_no].Day.SunUp         = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&days[day_no].Day, &raw_weather.List[i])
             newDay = false
 
@@ -112,6 +116,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Day.Title         = dayName
             days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
             days[day_no].Day.Rain.Amount   = rainSum
+            days[day_no].Day.SunUp         = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&days[day_no].Day, &raw_weather.List[i])
         } else if hour == 15 {
             // Set final day rain
@@ -126,6 +131,16 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Night.Title       = dayName
             days[day_no].Night.Rain.Chance = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount = rainSum
+            days[day_no].Day.SunUp         = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
+            populateData(&days[day_no].Night, &raw_weather.List[i])
+            days[day_no].Night.Rain.Chance       = toInt(maxChance*100)
+            days[day_no].Night.Rain.Amount       = rainSum
+        } else if hour == 0 {
+            days[day_no].DayName           = dayName
+            days[day_no].Night.Title       = dayName
+            days[day_no].Night.Rain.Chance = toInt(maxChance*100)
+            days[day_no].Night.Rain.Amount = rainSum
+            days[day_no].Day.SunUp         = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&days[day_no].Night, &raw_weather.List[i])
             days[day_no].Night.Rain.Chance       = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount       = rainSum
@@ -154,13 +169,14 @@ func mapHours(raw_weather owm.WeatherRange, dayIndex int) DayHours {
             hourData.Title = fmt.Sprintf("%v:00", hour)
             hourData.Rain.Chance = toInt(raw_weather.List[i].Pop*100)
             hourData.Rain.Amount = raw_weather.List[i].Rain.Mm + raw_weather.List[i].Snow.Mm
+            hourData.SunUp = sunUp(raw_weather.List[i].Dt, hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&hourData, &raw_weather.List[i])
             hours = append(hours, hourData)
-            if hour == 21 {
+            if hour == 0 {
                 break
             }
         }
-        if hour == 21 {
+        if hour == 0 {
             day_no += 1
         }
     }
@@ -170,6 +186,19 @@ func mapHours(raw_weather owm.WeatherRange, dayIndex int) DayHours {
     day.Timestamp = uint(time.Now().Unix())
     return day
 }
+
+/* Returns bool true, if sun is up at timestamp.
+ */
+func sunUp(timestamp uint, hour uint, sunrise uint, sunset uint) bool {
+    if hour == 0 {
+        return timestamp < sunset
+    } else if hour <= 12 {
+        return timestamp > sunrise
+    } else {
+        return timestamp < sunset
+    }
+}
+
 
 /* Copies data from InWeather to WeatherData
  */
