@@ -41,7 +41,8 @@ function base64(str) {
 }
 
 /* Makes a request for weather data and populates the table with the data
- * cityName: str: Name of the city to search
+ * cityName: str:  Name of the city to search
+ * returns:  bool: ok
  */
 async function fetchWeatherData() {
     try {
@@ -51,8 +52,12 @@ async function fetchWeatherData() {
         if (!response.ok) throw new Error('Network response was not ok');
         weekData = await response.json();
     } catch (error) {
-        console.error('There has been a problem with your fetch operation:', error);
+        return false;
     }
+    return true;
+}
+
+function activateUI() {
     dayButton.removeAttribute("disabled");      // Enables Day/Night button
     reloadBtn.removeAttribute("disabled");      // Enables Reload button
     dayTitle.setAttribute("hidden", "");        // Hide hour forecast title
@@ -64,14 +69,17 @@ async function fetchWeatherData() {
 
 /* Sends sets the city name for weather request
  */
-function submitCity() {
+async function submitCity() {
     if (cityInput.value && cityInput.value != "City") {
         if (cookieConsent.checked) {
             cookie.setCookie("city", base64(cityInput.value), ttl*DAY);
         } else {
             cookie.setCookie("city", base64(cityInput.value));   // Cookie expires in one second
         }
-        fetchWeatherData();
+        let ok = await fetchWeatherData();
+        if (ok === true) {
+            activateUI();
+        }
     }
 }
 
@@ -128,7 +136,7 @@ submitButton.addEventListener("click", () => {
 /* Reload button
  */
 reloadBtn.addEventListener("click", () => {
-    submitCity();
+    fetchWeatherData()
 });
 
 /* Day/Night button
@@ -217,5 +225,8 @@ if (cookieConsent.checked) {
         makeFullscreen();
     }
     cookieConsent.checked = true;
-    fetchWeatherData();
+    let ok = await fetchWeatherData();
+    if (ok === true) {
+        activateUI();
+    }
 }
