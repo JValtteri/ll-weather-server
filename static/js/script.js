@@ -138,8 +138,10 @@ dayButton.addEventListener("click", () => {
     table.populateTable(weekData.Days, daysForecast, str_tf());
     if (timeframe == 1) {
         dayButton.textContent = "DAY";
+        dayButton.classList.remove('night');
     } else {
         dayButton.textContent = "NIGHT";
+        dayButton.classList.add('night');
     }
 });
 
