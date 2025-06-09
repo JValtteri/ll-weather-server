@@ -137,6 +137,9 @@ submitButton.addEventListener("click", () => {
  */
 reloadBtn.addEventListener("click", () => {
     fetchWeatherData()
+    table.populateTable(weekData.Days, daysForecast, str_tf());
+    hoursForecast.setAttribute("hidden", "");
+    dayTitle.setAttribute("hidden", "");
 });
 
 /* Day/Night button
