@@ -107,7 +107,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Day.Title         = dayName
             days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
             days[day_no].Day.Rain.Amount   = rainSum
-            days[day_no].Day.SunUp         = true
+            days[day_no].Day.SunUp         = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&days[day_no].Day, &raw_weather.List[i])
             newDay = false
 
@@ -118,7 +118,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Day.Title         = dayName
             days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
             days[day_no].Day.Rain.Amount   = rainSum
-            days[day_no].Day.SunUp         = true
+            days[day_no].Day.SunUp         = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&days[day_no].Day, &raw_weather.List[i])
         } else if hour == 15 {
             // Set final day rain
@@ -133,7 +133,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Night.Title       = dayName
             days[day_no].Night.Rain.Chance = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount = rainSum
-            days[day_no].Night.SunUp       = false
+            days[day_no].Night.SunUp         = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&days[day_no].Night, &raw_weather.List[i])
             days[day_no].Night.Rain.Chance       = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount       = rainSum
@@ -142,7 +142,7 @@ func mapDays(raw_weather owm.WeatherRange) WeekWeather {
             days[day_no].Night.Title       = dayName
             days[day_no].Night.Rain.Chance = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount = rainSum
-            days[day_no].Night.SunUp       = false
+            days[day_no].Night.SunUp       = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
             populateData(&days[day_no].Night, &raw_weather.List[i])
             days[day_no].Night.Rain.Chance       = toInt(maxChance*100)
             days[day_no].Night.Rain.Amount       = rainSum
