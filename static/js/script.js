@@ -117,6 +117,13 @@ function makeFullscreen() {
     }
 }
 
+async function reloadForecast(){
+    await fetchWeatherData();
+    table.populateTable(weekData.Days, daysForecast, str_tf());
+    hoursForecast.setAttribute("hidden", "");
+    dayTitle.setAttribute("hidden", "");
+}
+
 /*
  * Buttons and Events
  */
@@ -136,10 +143,7 @@ submitButton.addEventListener("click", () => {
 /* Reload button
  */
 reloadBtn.addEventListener("click", () => {
-    fetchWeatherData()
-    table.populateTable(weekData.Days, daysForecast, str_tf());
-    hoursForecast.setAttribute("hidden", "");
-    dayTitle.setAttribute("hidden", "");
+    reloadForecast();
 });
 
 /* Day/Night button
