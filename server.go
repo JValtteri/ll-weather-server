@@ -118,5 +118,5 @@ func sanitize(input string) string {
             i++
         }
     }
-    return result.String()
+    return strings.ToLower(result.String())
 }
