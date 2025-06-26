@@ -4,6 +4,16 @@
 
 A weather forecast web app with a **Go** backend.
 
+## Index
+
+- [Index](#index)
+- [Description](#description)
+- [Requirements](#requirements)
+- [Configuration](#configuration)
+- [Running Server](#running-server)
+- [Planned and Completed Features](#planned-and-completed-features)
+- [Data Sources](#data-sources)
+
 ## Description
 
 A fast, light weight, all-in-one web app to provide weather forecasts. Some weather forecast services provide web pages that are heavy and slow to load. LL-Weather-Server is as light and lean as can be. The backend is done with **Go**. The primary source for data is [openweathermap.org](https://openweathermap.org/api). The data is cached in the backend to reduce required API calls and to speed up responses.
@@ -13,24 +23,6 @@ A fast, light weight, all-in-one web app to provide weather forecasts. Some weat
 ## Requirements
 
 - [**Go**](https://go.dev/) 1.19 or newer
-
-## Planned and Completed Features
-
-- [x] Light weight
-- [x] Weather data caching
-- [x] Search for cities
-- [x] Configfile (JSON)
-- [x] Expand day previews to show detailed forecast for the day
-- [x] Show weather preview for noon and night (22:00), for astronomy purposes
-- [ ] Seamless update of data, but cached data for lighting fast initial response
-- [x] Show at a glance
-- [ ] Customization
-- [ ] Location and customization in URL for easy bookmarking
-- [ ] Dockerized
-- [ ] Aggregate multiple data sources
-- [ ] Weather Map
-- [ ] Implement cache size limiting
-- [ ] Tests
 
 ## Configuration
 
@@ -108,6 +100,27 @@ go build
 
 and then run the generated executable `ll-weather-server`
 
+## Planned and Completed Features
+
+- [x] Light weight
+- [x] Show at a glance
+- [x] Weather data caching
+- [x] Search for cities
+- [x] Configfile (JSON)
+- [x] Expand day previews to show detailed forecast for the day
+- [x] Show weather preview for noon and night (22:00), for astronomy purposes
+- [x] Implement cache size limiting
+- [x] Tests
+
+#### Planned
+- [ ] Seamless update of data, but cached data for lighting fast initial response
+- [ ] Customization
+- [ ] ~~Location and customization in URL for easy bookmarking~~
+- [ ] Dockerized
+- [ ] Aggregate multiple data sources
+- [ ] Weather Map
+
 ## Data Sources
 
 The server uses [JValtteri/weather](https://github.com/JValtteri/weather/) API Libraries to fetch weather data.
+
