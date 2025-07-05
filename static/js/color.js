@@ -33,7 +33,7 @@ function colorRainChance(element) {
 }
 
 function colorRain(element) {
-    let value = parseInt(element.textContent.split(' ')[0]);
+    let value = parseFloat(element.textContent.split(' ')[0]);
     if (value > 3) {
         element.classList.add('heavy')
     } else if (value > 1) {
@@ -45,9 +45,9 @@ function colorRain(element) {
 
 function colorWind(element) {
     let value = parseInt(element.textContent.split(' ')[0]);
-    if (value >= 15) {
+    if (value >= 10) {
         element.classList.add('heavy')
-    } else if (value > 9) {
+    } else if (value > 7) {
         element.classList.add('medium')
     } else if (value >= 4) {
         element.classList.add('light')
@@ -84,4 +84,3 @@ export function colorSun(element, sunUp) {
         element.classList.remove('night');   // This should be unnecessary
     }
 }
-
