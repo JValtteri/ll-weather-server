@@ -74,17 +74,24 @@ function addImage(element, day, path, _='') {
  * parameters:  []str:    containing the path from day object to chosen field
  * rowTitle:    str:      A title for the row (placed in first column)
  * func:        function: a function used to add content to the created cell
+ * unit:        string:   unit sign of the value
+ * masterOf     string:   adds a show/hide button that controls the visibility of the group of that name
+ * slaveTo      string:   is set as hidden, and belongs to group by this name
  */
-function populateRow(days, table, elementType, path, rowTitle, func, unit='') {
+function populateRow(days, table, elementType, path, rowTitle, func, unit='', masterOf='', slaveTo='') {
     if (path[0] === '') {
         path.splice(0, 1);
     }
     // Create new row
     let rowElm = document.createElement('tr');
+    if (slaveTo) {
+        rowElm.setAttribute("hidden", '');
+        rowElm.setAttribute("class", slaveTo);
+    }
     table.appendChild(rowElm);
     // Title cells
     let titleElm = document.createElement(elementType);
-    titleElm.textContent = rowTitle;
+    titleElm.textContent = rowTitle + " +";
     rowElm.appendChild(titleElm);
     // Data cells
     let columnElm;
@@ -102,20 +109,63 @@ function populateRow(days, table, elementType, path, rowTitle, func, unit='') {
  * parefix:     []str:    containing the path from day object to chosen field
  */
 export function populateTable(days, table, path) {
+    // Paths
+    const title = [path, 'Title'];
+    const image = [path];
+    const desc = [path, 'Description'];
+    const temp = [path, 'Temp', 'Temp'];
+    const feels = [path, 'Temp', 'Feels'];
+    const bulb = [path, 'Temp', 'Bulb'];
+    const uv = [path, 'Uv'];
+    const radiation = [path, 'Radiation', 'Direct'];
+    const diffuse = [path, 'Radiation', 'Diffuse'];
+
+    const clouds = [path, 'Clouds','Clouds'];
+    const cloudsLo = [path, 'Clouds','Low'];
+    const cloudsMed = [path, 'Clouds','Mid'];
+    const cloudsHigh = [path, 'Clouds','High'];
+
+    const chance = [path, 'Rain', 'Chance'];
+    const amount = [path, 'Rain', 'Amount'];
+
+    const speed = [path, 'Wind','Speed'];
+    const gust = [path, 'Wind','Gust'];
+    const direction = [path, 'Wind','Dir'];
+
+    const pressure = [path, 'Pressure'];
+    const humidity = [path, 'Humidity'];
+    const visibility = [path, 'Visibility'];
+
+
     // Create rows and titles
     table.innerHTML = "";
-    populateRow(days, table, 'th', [path, 'Title'],            "",          addSun, ''); //Day name with sun up indication
-    populateRow(days, table, 'td', [path],                     "",          addImage, '');// Icons
-    populateRow(days, table, 'td', [path, 'Description'],      "Desc.",     addText, '');
-    populateRow(days, table, 'td', [path, 'Temp'],             "Temp.",     addNum, '°C');
-    populateRow(days, table, 'td', [path, 'Clouds','Clouds'],  "Clouds %",  addNum, ' %'); // Total
-    populateRow(days, table, 'td', [path, 'Rain', 'Chance'],   "Rain%",     addNum, ' %'); // Chance
-    populateRow(days, table, 'td', [path, 'Rain', 'Amount'],   "Rain [mm]", addNum, ' mm'); // Total
-                                                                                      // Layers
-    populateRow(days, table, 'td', [path, 'Wind','Speed'],     "Wind",      addNum, ' m/s');
-    populateRow(days, table, 'td', [path, 'Wind','Dir'],       "Direction", addText, '');
-    //populateRow(days, table, 'td', [path, 'Pressure'],         "Pressure",  addNum, ' hPa');
-    //populateRow(days, table, 'td', [path, 'Humidity'],         "Humidity",  addNum, ' %');
-    //populateRow(days, table, 'td', [path, 'Visibility'],      "Visibility", addText);
+    populateRow(days, table, 'th', title,      "",           addSun, '');                  //Day name with sun up indication
+    populateRow(days, table, 'td', image,      "",           addImage, '');                // Icons
+    populateRow(days, table, 'td', desc,       "Desc.",      addText, '');
+    populateRow(days, table, 'td', temp,       "Temp.",      addNum, '°C', "temp");
+
+    populateRow(days, table, 'td', feels,      "Feels",      addNum, '°C', '', "temp");
+    populateRow(days, table, 'td', bulb,       "Wet Bulb",   addNum, '°C', '', "temp");
+    populateRow(days, table, 'td', uv,         "UV",         addNum, '', '', "temp");
+
+    populateRow(days, table, 'td', radiation,  "Radiation",  addNum, ' W/m²', 'radiation', "temp");
+    populateRow(days, table, 'td', diffuse,    "Diffuse",    addNum, ' W/m²', '', "radiation");
+
+    populateRow(days, table, 'td', clouds,     "Clouds %",   addNum, ' %', "clouds");      // Total
+    populateRow(days, table, 'td', cloudsLo,   "Low %",      addNum, ' %', '', "clouds");
+    populateRow(days, table, 'td', cloudsMed,  "Med %",      addNum, ' %', '', "clouds");
+    populateRow(days, table, 'td', cloudsHigh, "High %",     addNum, ' %', '', "clouds");
+
+    populateRow(days, table, 'td', visibility, "Visibility", addText, " m", '', "clouds");
+
+    populateRow(days, table, 'td', chance,     "Rain%",      addNum, ' %');                // Chance
+    populateRow(days, table, 'td', amount,     "Rain [mm]",  addNum, ' mm', "atmo");       // Total
+    populateRow(days, table, 'td', pressure,   "Pressure",    addNum, ' hPa', '', "atmo");
+    populateRow(days, table, 'td', humidity,   "Humidity",    addNum, ' %', '', "atmo");
+
+    populateRow(days, table, 'td', speed,      "Wind",       addNum, ' m/s', "wind");
+    populateRow(days, table, 'td', gust,       "Gust",       addText, ' m/s', "", "wind");
+    populateRow(days, table, 'td', direction,  "Direction",  addText, '');
+
     color.applyColors(table);
 }

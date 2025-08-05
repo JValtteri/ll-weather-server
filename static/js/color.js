@@ -71,10 +71,18 @@ function applyColorRow(table, row, func) {
  */
 export function applyColors(table) {
     applyColorRow(table, 3, colorTemp);
-    applyColorRow(table, 4, colorCloud);
-    applyColorRow(table, 5, colorRainChance);
-    applyColorRow(table, 6, colorRain);
-    applyColorRow(table, 7, colorWind);
+    applyColorRow(table, 4, colorTemp);
+    applyColorRow(table, 5, colorTemp);
+
+    applyColorRow(table, 9, colorCloud);
+    applyColorRow(table, 10, colorCloud);
+    applyColorRow(table, 11, colorCloud);
+    applyColorRow(table, 12, colorCloud);
+
+    applyColorRow(table, 14, colorRainChance);
+    applyColorRow(table, 15, colorRain);
+    applyColorRow(table, 18, colorWind);
+    applyColorRow(table, 19, colorWind);
 }
 
 export function colorSun(element, sunUp) {
