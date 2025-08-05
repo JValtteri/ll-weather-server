@@ -16,23 +16,39 @@ type WeekWeather struct {
     City      string
     Timestamp uint
     Days      []DayWeather
+    Coord     struct {
+        Lat   float32
+        Lon   float32
+    }
 }
 
 type DayWeather struct {
     DayName    string
     Day        WeatherData
     Night      WeatherData
+    Coord     struct {
+        Lat   float32
+        Lon   float32
+    }
 }
 
 type DayHours struct {
     City      string
     Timestamp uint
     Hours     []WeatherData
+    Coord     struct {
+        Lat   float32
+        Lon   float32
+    }
 }
 
 type WeatherData struct {
     Title       string   // Day or Time
-    Temp        float32
+    Temp        struct {
+        Temp    float32
+        Feels   float32
+        Bulb    float32
+    }
     Description string
     Wind struct {
         Speed float32
@@ -52,7 +68,12 @@ type WeatherData struct {
         Chance int     // %
         Amount float32 // mm
     }
+    Radiation struct {
+        Direct float32
+        Diffuse float32
+    }
     Visibility uint
+    Uv         float32
     IconID     string
     SunUp      bool
 }
@@ -203,7 +224,7 @@ func sunUp(hour uint, sunrise_dt uint, sunset_dt uint) bool {
 /* Copies data from InWeather to WeatherData
  */
 func populateData(target *WeatherData, source *owm.Weather) {
-    target.Temp          = source.Main.Temp
+    target.Temp.Temp     = source.Main.Temp
     target.Pressure      = source.Main.Sea_level
     target.Humidity      = source.Main.Humidity
     target.Description   = source.Weather[0].Description
