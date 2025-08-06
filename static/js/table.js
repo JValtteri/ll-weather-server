@@ -16,9 +16,9 @@ function constructJsonPath(dataTarget, path) {
 /* Function to add text content to a cell
  * To be used as a parameter for populateRow()
  */
-function addText(element, day, path, _='') {
+function addText(element, day, path, unit='') {
     let text = constructJsonPath(day, path);
-    element.textContent = text;
+    element.textContent = `${text}${unit}`;
     return element;
 }
 
@@ -41,16 +41,29 @@ function addSun(element, day, path, _='') {
 }
 
 
-/* Function to add number content to a cell
+/* Function to add int content to a cell
  * Rounds numbers to integers. Adds the optional unit parameter
  * To be used as a parameter for populateRow()
  */
-function addNum(element, day, path, unit='') {
+function addInt(element, day, path, unit='') {
     let num = constructJsonPath(day, path);
     if (!num) {
         num = 0;
     }
     element.textContent = `${num.toFixed(0)}${unit}`;
+    return element;
+}
+
+/* Function to add number content to a cell
+ * Rounds numbers to one decimal. Adds the optional unit parameter
+ * To be used as a parameter for populateRow()
+ */
+function addFloat(element, day, path, unit='') {
+    let num = constructJsonPath(day, path);
+    if (!num) {
+        num = 0;
+    }
+    element.textContent = `${num.toFixed(1)}${unit}`;
     return element;
 }
 
@@ -174,30 +187,30 @@ export function populateTable(days, table, path) {
     table.innerHTML = "";
     populateRow(days, table, 'th', title,      "",           addSun, '');                  //Day name with sun up indication
     populateRow(days, table, 'td', image,      "",           addImage, '');                // Icons
-    populateRow(days, table, 'td', desc,       "Desc.",      addText, '');
-    populateRow(days, table, 'td', temp,       "Temp.",      addNum, '°C', "temp");
+    populateRow(days, table, 'td', desc,       "Desc.",      addText, '', '', 'void');
+    populateRow(days, table, 'td', temp,       "Temp.",      addInt, '°C', "temp");
 
-    populateRow(days, table, 'td', feels,      "Feels",      addNum, '°C', '', "temp");
-    populateRow(days, table, 'td', bulb,       "Wet Bulb",   addNum, '°C', '', "temp");
-    populateRow(days, table, 'td', uv,         "UV",         addNum, '', '', "temp");
+    populateRow(days, table, 'td', feels,      "Feels",      addInt, '°C', '', "temp");
+    populateRow(days, table, 'td', bulb,       "Wet Bulb",   addInt, '°C', '', "temp");
+    populateRow(days, table, 'td', uv,         "UV",         addInt, '', '', "temp");
 
-    populateRow(days, table, 'td', radiation,  "Radiation",  addNum, ' W/m²', 'radiation', "temp");
-    populateRow(days, table, 'td', diffuse,    "Diffuse",    addNum, ' W/m²', '', "radiation");
+    populateRow(days, table, 'td', radiation,  "Radiation",  addInt, ' W/m²', 'radiation', "temp");
+    populateRow(days, table, 'td', diffuse,    "Diffuse",    addInt, ' W/m²', '', "radiation");
 
-    populateRow(days, table, 'td', clouds,     "Clouds %",   addNum, ' %', "clouds");      // Total
-    populateRow(days, table, 'td', cloudsLo,   "Low %",      addNum, ' %', '', "clouds");
-    populateRow(days, table, 'td', cloudsMed,  "Med %",      addNum, ' %', '', "clouds");
-    populateRow(days, table, 'td', cloudsHigh, "High %",     addNum, ' %', '', "clouds");
+    populateRow(days, table, 'td', clouds,     "Clouds %",   addInt, ' %', "clouds");      // Total
+    populateRow(days, table, 'td', cloudsLo,   "Low %",      addInt, ' %', '', "clouds");
+    populateRow(days, table, 'td', cloudsMed,  "Med %",      addInt, ' %', '', "clouds");
+    populateRow(days, table, 'td', cloudsHigh, "High %",     addInt, ' %', '', "clouds");
 
-    populateRow(days, table, 'td', visibility, "Visibility", addText, " m", '', "clouds");
+    populateRow(days, table, 'td', visibility, "Visibility", addInt, " m", '', "clouds");
 
-    populateRow(days, table, 'td', chance,     "Rain%",      addNum, ' %');                // Chance
-    populateRow(days, table, 'td', amount,     "Rain [mm]",  addNum, ' mm', "atmo");       // Total
-    populateRow(days, table, 'td', pressure,   "Pressure",    addNum, ' hPa', '', "atmo");
-    populateRow(days, table, 'td', humidity,   "Humidity",    addNum, ' %', '', "atmo");
+    populateRow(days, table, 'td', chance,     "Rain%",      addFloat, ' %');                // Chance
+    populateRow(days, table, 'td', amount,     "Rain [mm]",  addFloat, ' mm', "atmo");       // Total
+    populateRow(days, table, 'td', pressure,   "Pressure",    addInt, ' hPa', '', "atmo");
+    populateRow(days, table, 'td', humidity,   "Humidity",    addInt, ' %', '', "atmo");
 
-    populateRow(days, table, 'td', speed,      "Wind",       addNum, ' m/s', "wind");
-    populateRow(days, table, 'td', gust,       "Gust",       addText, ' m/s', "", "wind");
+    populateRow(days, table, 'td', speed,      "Wind",       addInt, ' m/s', "wind");
+    populateRow(days, table, 'td', gust,       "Gust",       addInt, ' m/s', "", "wind");
     populateRow(days, table, 'td', direction,  "Direction",  addText, '');
 
     color.applyColors(table);

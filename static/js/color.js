@@ -34,11 +34,11 @@ function colorRainChance(element) {
 
 function colorRain(element) {
     let value = parseFloat(element.textContent.split(' ')[0]);
-    if (value > 3) {
+    if (value > 1) {                    // Values adjusted n/3 to fit new data source
         element.classList.add('heavy')
-    } else if (value > 1) {
+    } else if (value > 1/3) {
         element.classList.add('medium')
-    } else if (value > 0) {
+    } else if (value > 0.0) {
         element.classList.add('light')
     }
 }
