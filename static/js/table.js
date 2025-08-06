@@ -76,6 +76,16 @@ function toggleHide(element) {
     }
 }
 
+/* Toggles between '×' and '+' for expanding rows
+ */
+function toggleX(element) {
+    if (element.innerHTML.slice(-5, -4) === "+") {
+        element.innerHTML = element.innerHTML.replace("<b>+</b>", "<b>&times</b>");
+    } else {
+        element.innerHTML = element.innerHTML.replace("<b>×</b>", "<b>+</b>"); // &times;
+    }
+}
+
 /* Creates a new row <tr>
  * Inputs:
  * days:        []obj:    'day' objects
@@ -102,13 +112,14 @@ function populateRow(days, table, elementType, path, rowTitle, func, unit='', ma
     // Title cells
     let titleElm = document.createElement(elementType);
     if (masterOf) {
-        titleElm.textContent = rowTitle + " +";
+        titleElm.innerHTML = rowTitle + "&ensp; <b>+</b>";
         titleElm.setAttribute("id", masterOf);
         titleElm.addEventListener("click", function() {
             const subjectLines = Array.from( document.getElementsByClassName(masterOf) );
             subjectLines.forEach(line => {
                 toggleHide(line);
             });
+            toggleX(titleElm);
         });
 
     } else {
