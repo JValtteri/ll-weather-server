@@ -9,6 +9,8 @@ import (
     "unicode"
     "unicode/utf8"
     "encoding/base64"
+    "github.com/JValtteri/weather/owm"
+    "github.com/JValtteri/weather/om"
 )
 
 var rqNum uint = 0
@@ -51,12 +53,22 @@ func defaultRequest(w http.ResponseWriter, request *http.Request) {
 func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     rqNum++
     var f_obj WeekWeather
-    var city string  = sanitize(getCookie(request))
+    var city string  = getCookie(request, "city")
+    var legacy string = sanitize(getCookie(request, "alternate"))
+    city = sanitize(decode64(city))
     if city == "" {
         return
     }
-    r_obj, err := GetProxyWeather(city)
-    f_obj = mapDays(r_obj)
+    var err error
+    if legacy == "true" {
+        var r_obj owm.WeatherRange
+        r_obj, err = GetOwmProxyWeather(city)
+        f_obj = mapOwmDays(r_obj)
+    } else {
+        var r_obj om.WeatherRange
+        r_obj, err = GetOmProxyWeather(city)
+        f_obj = mapOmDays(r_obj)
+    }
     setCorrs(w)
     if err != nil {
         http.NotFound(w, request)
@@ -68,7 +80,9 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
 func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     rqNum++
     var f_obj DayHours
-    var city string  = sanitize(getCookie(request))
+    var city string  = getCookie(request, "city")
+    var legacy string = sanitize(getCookie(request, "alternate"))
+    city = sanitize(decode64(city))
     if city == "" {
         return
     }
@@ -78,8 +92,15 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     if err != nil {
         http.Error(w, "400 Bad Request", http.StatusBadRequest)
     }
-    r_obj, err := GetProxyWeather(city)
-    f_obj = mapHours(r_obj, dayNumber)
+    if legacy == "true" {
+        var r_obj owm.WeatherRange
+        r_obj, err = GetOwmProxyWeather(city)
+        f_obj = mapOwmHours(r_obj, dayNumber)
+    } else {
+        var r_obj om.WeatherRange
+        r_obj, err = GetOmProxyWeather(city)
+        f_obj = mapOmHours(r_obj, dayNumber)
+    }
     setCorrs(w)
     if err != nil {
         http.NotFound(w, request)
@@ -88,12 +109,16 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     fmt.Fprintf(w, unloadJSON(f_obj))
 }
 
-func getCookie(request *http.Request) string {
-    cookie, err := request.Cookie("city")
+func getCookie(request *http.Request, cookieName string) string {
+    cookie, err := request.Cookie(cookieName)
     if err != nil {
         return ""
     }
-    value, err := base64.StdEncoding.DecodeString(cookie.Value)
+    return cookie.Value
+}
+
+func decode64(str64 string) string {
+    value, err := base64.StdEncoding.DecodeString(str64)
     if err != nil {
         return ""
     }
