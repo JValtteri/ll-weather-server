@@ -359,7 +359,6 @@ func populateOmData(target *WeatherData, source *om.WeatherRange, index int) {
     target.Pressure      = toInt(source.Hourly.Surface_pressure[index])
     target.Humidity      = float32(source.Hourly.Relative_humidity_2m[index])
     //target.Description   = source.Weather[0].Description[index]
-    target.IconID        = string(source.Hourly.Weather_code[index])
     target.Clouds.Clouds = uint(source.Hourly.Cloud_cover[index])
     target.Clouds.Low    = uint(source.Hourly.Cloud_cover_low[index])
     target.Clouds.Mid    = uint(source.Hourly.Cloud_cover_mid[index])
@@ -374,6 +373,7 @@ func populateOmData(target *WeatherData, source *om.WeatherRange, index int) {
     target.Wind.Gust     = source.Hourly.Wind_gusts_10m[index]
     target.Wind.Deg      = source.Hourly.Wind_direction_10m[index]
     target.Wind.Dir      = windToStr(target.Wind.Deg)
+    target.IconID        = wmoToOwm(source.Hourly.Weather_code[index], target.SunUp)
 }
 
 /* Maps wind angle in to a string representation of it's direction
@@ -425,4 +425,57 @@ func unloadJSON(object any) string {
         log.Println("JSON response marshalling error:", err)
     }
     return string(body)
+}
+
+/* Translates WNO WW codes to OWM weather image codes
+ */
+func wmoToOwm(ww int, day bool) string {
+    var iconId string
+    if day {
+        iconId = OwmCodes[ww] + "d"
+    } else {
+        iconId = OwmCodes[ww] + "n"
+    }
+    return iconId
+}
+
+// Conversion table for WNO WW codes to OWM weather image codes
+var OwmCodes = map[int]string{
+    // Clear
+    0: "01",
+    // Clouds
+    1: "02",
+    2: "03",
+    3: "04",
+    // Fog
+    45: "50",
+    48: "50",
+    // Drizzle
+    51: "10",
+    53: "10",
+    55: "10",
+    // Rain
+    61: "10",
+    63: "09",
+    65: "09",
+    // Freezing Rain
+    66: "09",
+    67: "09",
+    // Snow
+    71: "13",
+    73: "13",
+    75: "13",
+    // Hail
+    77: "13",
+    // Showers
+    80: "10",
+    81: "10",
+    82: "09",
+    // Snow
+    85: "13",
+    86: "13",
+    // Thunder
+    95: "11",
+    96: "11",
+    99: "11",
 }
