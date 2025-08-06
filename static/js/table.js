@@ -66,6 +66,16 @@ function addImage(element, day, path, _='') {
     return element;
 }
 
+/* Toggles element 'hidden' status on or off
+ */
+function toggleHide(element) {
+    if (element.hasAttribute('hidden')) {
+        element.removeAttribute('hidden');
+    } else {
+        element.setAttribute('hidden', '');
+    }
+}
+
 /* Creates a new row <tr>
  * Inputs:
  * days:        []obj:    'day' objects
@@ -86,12 +96,24 @@ function populateRow(days, table, elementType, path, rowTitle, func, unit='', ma
     let rowElm = document.createElement('tr');
     if (slaveTo) {
         rowElm.setAttribute("hidden", '');
-        rowElm.setAttribute("class", slaveTo);
+        rowElm.classList.add(slaveTo);
     }
     table.appendChild(rowElm);
     // Title cells
     let titleElm = document.createElement(elementType);
-    titleElm.textContent = rowTitle + " +";
+    if (masterOf) {
+        titleElm.textContent = rowTitle + " +";
+        titleElm.setAttribute("id", masterOf);
+        titleElm.addEventListener("click", function() {
+            const subjectLines = Array.from( document.getElementsByClassName(masterOf) );
+            subjectLines.forEach(line => {
+                toggleHide(line);
+            });
+        });
+
+    } else {
+        titleElm.textContent = rowTitle;
+    }
     rowElm.appendChild(titleElm);
     // Data cells
     let columnElm;
