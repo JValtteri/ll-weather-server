@@ -211,6 +211,8 @@ daysForecast.addEventListener("click", function(event) {
         var target = event.target;
     } else if (event.target.tagName === "IMG" || event.target.tagName === "TD") {
         var target = event.target.parentElement;
+    } else if (event.target.tagName === "B") {
+        return;
     }
     const columnIndex = Array.from(target.parentElement.cells).indexOf(target);
     if (columnIndex != 0) {
