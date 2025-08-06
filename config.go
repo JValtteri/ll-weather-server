@@ -5,6 +5,7 @@ import (
     "os"
     "encoding/json"
     "github.com/JValtteri/weather/owm"
+    "github.com/JValtteri/weather/om"
 )
 
 type Config struct {
@@ -17,6 +18,7 @@ type Config struct {
     COUNTRY_CODE     string
     CACHE_AGE        uint  // Hours
     CACHE_SIZE       int
+    MODEL            string
 }
 
 type ApiKeys struct {
@@ -41,6 +43,7 @@ func LoadConfig() {
     unmarshal(raw_config, &API_KEYS)
     log.Println("Loaded API keys")
     owm.Config(API_KEYS.OPENWEATHERMAP, CONFIG.UNITS, CONFIG.COUNTRY_CODE)
+    om.Config(""                     , CONFIG.UNITS, CONFIG.MODEL)
 }
 
 func readConfig(fileName string) []byte {
