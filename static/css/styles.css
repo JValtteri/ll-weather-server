@@ -39,12 +39,12 @@ tr:nth-child(2) {
   background-color: #7686A0 !important;
 }
 
-tr:nth-child(even) {
-  background-color: #565656;
+tr {
+  background-color: #606060;
 }
 
-tr:nth-child(odd) {
-  background-color: #606060;
+.temp, .clouds, .rain, .wind, .radiation, .atmo {
+  background-color: #565656 !important;
 }
 
 th {
