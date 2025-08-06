@@ -5,6 +5,7 @@ const body          = document.getElementById('body');
 // Inputs
 const cityInput     = document.getElementById('city-name');
 const cookieConsent = document.getElementById('accept');
+const alternate     = document.getElementById('alternate');
 // Tables
 const daysForecast  = document.getElementById("days-forecast");
 const hoursForecast = document.getElementById("hours-forecast");
@@ -184,6 +185,16 @@ cookieConsent.addEventListener('click', () => {
         cookie.setCookie("city", "");       // Cookie is set as session cookie, so the browser should remove it after the session
         cookie.setCookie("consent", "");
         cookie.setCookie("fullscreen", "");
+    }
+});
+
+/* Alternate source clicked
+ */
+alternate.addEventListener('click', () => {
+    if (alternate.checked) {
+        cookie.setCookie("alternate", "true");  // Cookie is set as session cookie, so the browser should remove it after the session
+    } else {
+        cookie.setCookie("alternate", "");
     }
 });
 

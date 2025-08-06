@@ -10,6 +10,7 @@ import (
     "log"
     "encoding/json"
     "github.com/JValtteri/weather/owm"
+    "github.com/JValtteri/weather/om"
 )
 
 type WeekWeather struct {
