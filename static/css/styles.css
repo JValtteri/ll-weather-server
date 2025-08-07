@@ -51,7 +51,7 @@ th {
   background-color: #309050;
 }
 
-input {
+input, select {
   background-color: #b0b0b0;
   color: #000000;
   border-radius: 6px;
