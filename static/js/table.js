@@ -16,7 +16,7 @@ function constructJsonPath(dataTarget, path) {
 /* Function to add text content to a cell
  * To be used as a parameter for populateRow()
  */
-function addText(element, day, path, _='', _0=0) {
+function addText(element, day, path, _='') {
     let text = constructJsonPath(day, path);
     element.textContent = text;
     return element;
@@ -25,7 +25,7 @@ function addText(element, day, path, _='', _0=0) {
 /* Function to day/night indicator to title
  * To be used as a parameter for populateRow()
  */
-function addSun(element, day, path, _='', _0=0) {
+function addSun(element, day, path, _='') {
     let text = constructJsonPath(day, path);
     let sunPath = [];
     let sun = null;
@@ -45,19 +45,19 @@ function addSun(element, day, path, _='', _0=0) {
  * Rounds numbers to integers. Adds the optional unit parameter
  * To be used as a parameter for populateRow()
  */
-function addNum(element, day, path, unit='', decimals=0) {
+function addNum(element, day, path, unit='') {
     let num = constructJsonPath(day, path);
     if (!num) {
         num = 0;
     }
-    element.textContent = `${num.toFixed(decimals)}${unit}`;
+    element.textContent = `${num.toFixed(0)}${unit}`;
     return element;
 }
 
 /* Function to add an image element from data.day
  * To be used as a parameter for populateRow()
  */
-function addImage(element, day, path, _='', _0=0) {
+function addImage(element, day, path, _='') {
     let image = constructJsonPath(day, path);
     let imgElm = document.createElement('img');
     imgElm.src = "img/"+image.IconID
@@ -75,7 +75,7 @@ function addImage(element, day, path, _='', _0=0) {
  * rowTitle:    str:      A title for the row (placed in first column)
  * func:        function: a function used to add content to the created cell
  */
-function populateRow(days, table, elementType, path, rowTitle, func, unit='', decimals) {
+function populateRow(days, table, elementType, path, rowTitle, func, unit='') {
     if (path[0] === '') {
         path.splice(0, 1);
     }
@@ -90,7 +90,7 @@ function populateRow(days, table, elementType, path, rowTitle, func, unit='', de
     let columnElm;
     days.forEach(day => {
         columnElm = document.createElement(elementType);
-        let element = func(columnElm, day, path, unit, decimals);
+        let element = func(columnElm, day, path, unit);
         rowElm.appendChild(element);
     });
 }
@@ -104,18 +104,18 @@ function populateRow(days, table, elementType, path, rowTitle, func, unit='', de
 export function populateTable(days, table, path) {
     // Create rows and titles
     table.innerHTML = "";
-    populateRow(days, table, 'th', [path, 'Title'],            "",          addSun, '', 0); //Day name with sun up indication
-    populateRow(days, table, 'td', [path],                     "",          addImage, '', 0);// Icons
-    populateRow(days, table, 'td', [path, 'Description'],      "Desc.",     addText, '', 0);
-    populateRow(days, table, 'td', [path, 'Temp'],             "Temp.",     addNum, '°C', 0);
-    populateRow(days, table, 'td', [path, 'Clouds','Clouds'],  "Clouds %",  addNum, ' %', 0); // Total
-    populateRow(days, table, 'td', [path, 'Rain', 'Chance'],   "Rain%",     addNum, ' %', 0); // Chance
-    populateRow(days, table, 'td', [path, 'Rain', 'Amount'],   "Rain [mm]", addNum, ' mm', 1); // Total
+    populateRow(days, table, 'th', [path, 'Title'],            "",          addSun, ''); //Day name with sun up indication
+    populateRow(days, table, 'td', [path],                     "",          addImage, '');// Icons
+    populateRow(days, table, 'td', [path, 'Description'],      "Desc.",     addText, '');
+    populateRow(days, table, 'td', [path, 'Temp'],             "Temp.",     addNum, '°C');
+    populateRow(days, table, 'td', [path, 'Clouds','Clouds'],  "Clouds %",  addNum, ' %'); // Total
+    populateRow(days, table, 'td', [path, 'Rain', 'Chance'],   "Rain%",     addNum, ' %'); // Chance
+    populateRow(days, table, 'td', [path, 'Rain', 'Amount'],   "Rain [mm]", addNum, ' mm'); // Total
                                                                                       // Layers
-    populateRow(days, table, 'td', [path, 'Wind','Speed'],     "Wind",      addNum, ' m/s', 0);
-    populateRow(days, table, 'td', [path, 'Wind','Dir'],       "Direction", addText, '', 0);
-    //populateRow(days, table, 'td', [path, 'Pressure'],         "Pressure",  addNum, ' hPa', 0);
-    //populateRow(days, table, 'td', [path, 'Humidity'],         "Humidity",  addNum, ' %', 0);
-    //populateRow(days, table, 'td', [path, 'Visibility'],      "Visibility", addText, 0);
+    populateRow(days, table, 'td', [path, 'Wind','Speed'],     "Wind",      addNum, ' m/s');
+    populateRow(days, table, 'td', [path, 'Wind','Dir'],       "Direction", addText, '');
+    //populateRow(days, table, 'td', [path, 'Pressure'],         "Pressure",  addNum, ' hPa');
+    //populateRow(days, table, 'td', [path, 'Humidity'],         "Humidity",  addNum, ' %');
+    //populateRow(days, table, 'td', [path, 'Visibility'],      "Visibility", addText);
     color.applyColors(table);
 }
