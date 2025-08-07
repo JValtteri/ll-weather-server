@@ -24,6 +24,7 @@ func server() {
     http.Handle("/js/",  http.StripPrefix("/js/",  http.FileServer(http.Dir("./static/js"))))
     http.HandleFunc("/city",        cityOverviewRequest)
     http.HandleFunc("/city/detail", cityDetailRequest)
+    http.HandleFunc("/model",       modelChangeRequest)
     if CONFIG.ENABLE_TLS {
         log.Fatal(http.ListenAndServeTLS(
             fmt.Sprintf( ":%s", CONFIG.SERVER_PORT),
@@ -109,6 +110,19 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     fmt.Fprintf(w, unloadJSON(f_obj))
 }
 
+func modelChangeRequest(w http.ResponseWriter, request *http.Request) {
+    rqNum++
+    var model string = decode64(request.URL.Query().Get("model"))
+    if !whitelist(model, modelList) {
+        log.Printf("r:%6vu:%4v: Bad Model: %s\n", rqNum, uniqRqNum, model)
+        return
+    }
+    // TODO:  ADD whitelist to catch any funnybusiness
+    CONFIG.MODEL = model
+    om.Config("", CONFIG.UNITS, CONFIG.MODEL)  // Update to use the requested model
+    log.Printf("r:%6vu:%4v: Get Model: %s\n", rqNum, uniqRqNum, model)
+}
+
 func getCookie(request *http.Request, cookieName string) string {
     cookie, err := request.Cookie(cookieName)
     if err != nil {
@@ -122,8 +136,8 @@ func decode64(str64 string) string {
     if err != nil {
         return ""
     }
-    city := strings.TrimSpace(string(value))
-    return city
+    decoded := strings.TrimSpace(string(value))
+    return decoded
 }
 
 func setCorrs(w http.ResponseWriter) {
@@ -144,4 +158,31 @@ func sanitize(input string) string {
         }
     }
     return strings.ToLower(result.String())
+}
+
+func whitelist(input string, list []string) bool {
+    for _, v := range list {
+        if v == input {
+            return true
+        }
+    }
+    return false
+}
+
+var modelList = []string{
+    "",
+    "best_match",
+    "icon_eu",
+    "gem_global",
+    "gfs_graphcast025",
+    "knmi_harmonie_arome_europe",
+    "dmi_harmonie_arome_europe",
+    "meteofrance_arpege_europe",
+    "dmi_seamless",
+    "ukmo_global_deterministic_10km",
+    "jma_gsm",
+    "metno_seamless",
+    "ecmwf_ifs025",
+    "ecmwf_aifs025_single",
+    "cma_grapes_global",
 }

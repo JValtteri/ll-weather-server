@@ -80,7 +80,7 @@ func GetOmProxyWeather(city string) (om.WeatherRange, error) {
     }
     var r_obj om.WeatherRange
     var ok bool
-    r_obj, ok = searchOmCacheWeather(city)        // Check cache
+    r_obj, ok = searchOmCacheWeather(requestId(city, CONFIG.MODEL))        // Check cache
     if ok {
         log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f\n", rqNum, uniqRqNum, city, lat, lon)
         return r_obj, nil
@@ -88,7 +88,7 @@ func GetOmProxyWeather(city string) (om.WeatherRange, error) {
     uniqRqNum++
     log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f (New request)\n", rqNum, uniqRqNum, city, lat, lon)
     r_obj = om.Forecast(lat, lon)                 // Make request
-    addOmCacheWeather(city, r_obj)                // Cache response
+    addOmCacheWeather(requestId(city, CONFIG.MODEL), r_obj)                // Cache response
     return r_obj, nil
 }
 
@@ -189,7 +189,6 @@ func searchOmCacheWeather(key string) (om.WeatherRange, bool) {
         return om.WeatherRange{}, false
     }
     var tagAge uint = (uint(time.Now().Unix()) - dt)
-    //fmt.Printf("Now: \t%v\nDT:\t%v\nAge: \t%v\nMAX: \t%v\n", uint(time.Now().Unix()), dt, tagAge, SECONDS_IN_HOUR*CONFIG.CACHE_AGE)
     if tagAge > (SECONDS_IN_HOUR*CONFIG.CACHE_AGE) {
         delete(omWeatherCache, key)
         return r_obj, false
@@ -215,4 +214,8 @@ func searchCacheIcon(key string) ([]byte, bool) {
         return no_data, false
     }
     return data, ok
+}
+
+func requestId(city string, model string) string {
+    return fmt.Sprintf("%v:%v", city, model)
 }

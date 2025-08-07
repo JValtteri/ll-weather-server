@@ -6,6 +6,7 @@ const body          = document.getElementById('body');
 const cityInput     = document.getElementById('city-name');
 const cookieConsent = document.getElementById('accept');
 const alternate     = document.getElementById('alternate');
+const modelInput    = document.getElementById('model');
 // Tables
 const daysForecast  = document.getElementById("days-forecast");
 const hoursForecast = document.getElementById("hours-forecast");
@@ -17,6 +18,7 @@ let hourData = null;
 let weekData = null;
 //
 let timeframe = 1;  // 1 = Day, 0 = Night
+let dayIndex = 0;
 
 const DAY = 24*60*60*1000;
 const SECOND = 1000;
@@ -88,12 +90,21 @@ async function submitCity() {
  * cityName: str: Name of the city to search
  * dayIndex: int: Index of the day requested
  */
-async function fetchWeatherDetail(cityName, dayIndex) {
+async function fetchWeatherDetail() {
     try {
         const response = await fetch(`city/detail?day=${encodeURIComponent(dayIndex)}`);
         if (!response.ok) throw new Error('Network response was not ok');
         hourData = await response.json();
         table.populateTable(hourData.Hours, hoursForecast, '');
+    } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+    }
+}
+
+async function loadNewForecastModel(model) {
+    try {
+        const response = await fetch(`model?model=${base64(model)}`);
+        if (!response.ok) throw new Error('Network response was not ok');
     } catch (error) {
         console.error('There has been a problem with your fetch operation:', error);
     }
@@ -121,8 +132,9 @@ function makeFullscreen() {
 async function reloadForecast(){
     await fetchWeatherData();
     table.populateTable(weekData.Days, daysForecast, str_tf());
-    hoursForecast.setAttribute("hidden", "");
-    dayTitle.setAttribute("hidden", "");
+    if (!hoursForecast.hasAttribute("hidden")) {
+        fetchWeatherDetail();
+    }
 }
 
 /*
@@ -174,6 +186,13 @@ cityInput.addEventListener('keydown', (event) => {
         submitCity();
     }
 });
+
+/* Weather model changed
+ */
+modelInput.addEventListener("change", () => {
+    loadNewForecastModel(modelInput.value);
+    reloadForecast();
+})
 
 /* "Remember Me" clicked
  */
@@ -227,7 +246,8 @@ daysForecast.addEventListener("click", function(event) {
     }
     const columnIndex = Array.from(target.parentElement.cells).indexOf(target);
     if (columnIndex != 0) {
-        fetchWeatherDetail(cityTitle.textContent, columnIndex-1);
+        dayIndex = columnIndex-1
+        fetchWeatherDetail();
         hoursForecast.removeAttribute("hidden");
         dayTitle.removeAttribute("hidden");
         dayTitle.textContent = daysForecast.rows[0].cells[columnIndex].textContent
