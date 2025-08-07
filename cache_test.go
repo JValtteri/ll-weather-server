@@ -4,7 +4,7 @@ import (
     "testing"
     "time"
     "github.com/JValtteri/weather/owm"
-    "github.com/JValtteri/weather/om"
+    //"github.com/JValtteri/weather/om"
 )
 
 func setup() {
@@ -15,7 +15,7 @@ func setup() {
     owm.API_CONFIG.NETWORK = false
     // Clear out previous data from cache
     owmWeatherCache = make(map[string]owm.WeatherRange)
-    omWeatherCache = make(map[string]om.WeatherRange)
+    omWeatherCache = make(map[string]OmWrapper)
     cityCache   = make(map[string]Coords)
     iconCache   = make(map[string][]byte)
 }
@@ -68,7 +68,7 @@ func TestCityCacheLimit(t *testing.T) {
     }
 }
 
-func TestAddWeatherCache(t *testing.T) {
+func TestOwmAddWeatherCache(t *testing.T) {
     setup()
     //weatherCache
     var obj1 owm.WeatherRange
@@ -97,7 +97,7 @@ func TestAddWeatherCache(t *testing.T) {
     }
 }
 
-func TestWeatherCacheLimit(t *testing.T) {
+func TestOwmWeatherCacheLimit(t *testing.T) {
     setup()
     CONFIG.CACHE_SIZE = 1
     // cityCache
