@@ -9,19 +9,29 @@ import (
     "github.com/JValtteri/weather/om"
 )
 
-/*
-type WeatherRange interface {
-    om.WeatherRange | omw.WeatherRange
-}
-*/
-
 type Coords struct {
     lat float32
     lon float32
 }
 
+type OmWrapper struct {
+    dt uint
+    data om.WeatherRange
+}
+
+func omWrap(data om.WeatherRange) OmWrapper {
+    var wrapper OmWrapper
+    wrapper.data = data
+    wrapper.dt = uint(time.Now().Unix())
+    return wrapper
+}
+
+func omUnwrap(wrapper OmWrapper) (om.WeatherRange, uint) {
+    return wrapper.data, wrapper.dt
+}
+
 var owmWeatherCache map[string]owm.WeatherRange  = make(map[string]owm.WeatherRange)
-var omWeatherCache map[string]om.WeatherRange  = make(map[string]om.WeatherRange)
+var omWeatherCache map[string]OmWrapper   = make(map[string]OmWrapper)
 var cityCache map[string]Coords           = make(map[string]Coords)
 var iconCache map[string][]byte           = make(map[string][]byte)
 
@@ -78,7 +88,6 @@ func GetOmProxyWeather(city string) (om.WeatherRange, error) {
     uniqRqNum++
     log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f (New request)\n", rqNum, uniqRqNum, city, lat, lon)
     r_obj = om.Forecast(lat, lon)                 // Make request
-    //r_obj.Timestamp = uint(time.Now().Unix())
     addOmCacheWeather(city, r_obj)                // Cache response
     return r_obj, nil
 }
@@ -130,16 +139,17 @@ func addOwmCacheWeather(key string, r_obj owm.WeatherRange) {
 }
 
 func addOmCacheWeather(key string, r_obj om.WeatherRange) {
+    var wrapper OmWrapper = omWrap(r_obj)
     if len(omWeatherCache) < CONFIG.CACHE_SIZE {
-        omWeatherCache[key] = r_obj
+        omWeatherCache[key] = wrapper
     } else {
         cullMap(&omWeatherCache)
-        omWeatherCache[key] = r_obj
+        omWeatherCache[key] = wrapper
     }
 }
 
 // Throws away half (every 2nd) item of a given map
-func cullMap[V Coords | owm.WeatherRange | om.WeatherRange | []byte ](m *map[string]V) {
+func cullMap[V Coords | owm.WeatherRange | om.WeatherRange | OmWrapper | []byte ](m *map[string]V) {
     var i int = 0
     for key, _ := range *m {
         if i == 0 {
@@ -166,16 +176,20 @@ func searchOwmCacheWeather(key string) (owm.WeatherRange, bool) {
 
 func searchOmCacheWeather(key string) (om.WeatherRange, bool) {
     var r_obj om.WeatherRange
+    var dt uint
+    var wrapper OmWrapper
     var ok bool
-    r_obj, ok = omWeatherCache[key]
+    wrapper, ok = omWeatherCache[key]
     if !ok {
         return om.WeatherRange{}, false
     }
+    r_obj, dt = omUnwrap(wrapper)
     if len(r_obj.Hourly.Time) == 0 {
-        log.Println("OM Time range is empty!")
+        log.Println("OM Data range is empty!")
         return om.WeatherRange{}, false
     }
-    var tagAge uint = (uint(time.Now().Unix()) - r_obj.Hourly.Time[0])
+    var tagAge uint = (uint(time.Now().Unix()) - dt)
+    //fmt.Printf("Now: \t%v\nDT:\t%v\nAge: \t%v\nMAX: \t%v\n", uint(time.Now().Unix()), dt, tagAge, SECONDS_IN_HOUR*CONFIG.CACHE_AGE)
     if tagAge > (SECONDS_IN_HOUR*CONFIG.CACHE_AGE) {
         delete(omWeatherCache, key)
         return r_obj, false

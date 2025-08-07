@@ -365,7 +365,7 @@ func populateOmData(target *WeatherData, source *om.WeatherRange, index int) {
     target.Clouds.High   = uint(source.Hourly.Cloud_cover_high[index])
     target.Rain.Chance   = source.Hourly.Precipitation_probability[index]
     target.Rain.Amount   = source.Hourly.Precipitation[index]
-    target.Visibility    = uint(source.Hourly.Visibility[index])
+    target.Visibility    = uint(toInt(source.Hourly.Visibility[index]))
     target.SunUp         = toBool(source.Hourly.Is_day[index])
     target.Radiation.Direct  = source.Hourly.Direct_radiation[index]
     target.Radiation.Diffuse = source.Hourly.Diffuse_radiation[index]
