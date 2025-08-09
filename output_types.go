@@ -230,6 +230,10 @@ func mapOmDays(raw_weather om.WeatherRange) WeekWeather {
             break
         }
         dayName, hour := convertTime(raw_weather.Hourly.Time[i])
+        // Trim away past days
+        if timeInPast(raw_weather.Hourly.Time[i]) {
+            continue
+        }
         if hour == 6 {
             // Start counting rain for the day from 6:00
             maxChance = 0
@@ -301,6 +305,10 @@ func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
     hours := make([]WeatherData, 0, 8)
     for i:=0 ; i< len(raw_weather.Hourly.Time) ; i++ {
         _, hour := convertTime(raw_weather.Hourly.Time[i])
+        // Trim away past hours
+        if timeInPast(raw_weather.Hourly.Time[i]) {
+            continue
+        }
         if dayIndex == day_no {
             var hourData WeatherData
             hourData.Title = fmt.Sprintf("%v:00", hour)
@@ -321,6 +329,15 @@ func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
     //day.City = raw_weather.City.Name
     day.Timestamp = uint(time.Now().Unix())
     return day
+}
+
+func timeInPast(dt uint) bool {
+    now := uint(time.Now().Unix())
+    // Consider data points over 1 hour old to be "too old"
+    if dt + SECONDS_IN_HOUR < now {
+        return true
+    }
+    return false
 }
 
 /* Returns bool true, if The Sun is up at given hour.
