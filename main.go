@@ -13,6 +13,6 @@ func main() {
 
 func printAttribution() {
     fmt.Println("Data Sources:")
-    fmt.Println("  https://open-meteo.org/")
+    fmt.Println("  https://open-meteo.com/")
     fmt.Println("  https://openweathermap.org/api")
 }
