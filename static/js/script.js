@@ -1,5 +1,5 @@
-import * as table from "./table.js"
-import * as cookie from "./cookie.js"
+import * as table from "./table.js?id=MTc1NDY0OTQ4Ng=="
+import * as cookie from "./cookie.js?id=MTc1NDY0OTQ4Ng=="
 
 const body          = document.getElementById('body');
 // Inputs
