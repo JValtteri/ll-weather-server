@@ -224,11 +224,8 @@ func mapOmDays(raw_weather om.WeatherRange) WeekWeather {
     var day_no int = 0
     var newDay bool = true
     DT_OFFSET = raw_weather.UTC_OFFSET_SECONDS       // Update tiemzone offset
-    days := make([]DayWeather, 7, 24)
+    days := make([]DayWeather, 1, 24)
     for i:=0 ; i<len(raw_weather.Hourly.Time) ; i++ {
-        if day_no == 7 {
-            break
-        }
         dayName, hour := convertTime(raw_weather.Hourly.Time[i])
         // Trim away past days
         if timeInPast(raw_weather.Hourly.Time[i]) {
@@ -289,6 +286,14 @@ func mapOmDays(raw_weather om.WeatherRange) WeekWeather {
             days[day_no].Night.Rain.Amount       = rainSum
             day_no += 1
             newDay = true
+            if len(raw_weather.Hourly.Surface_pressure) > i+3 {
+                // If pressure shows zero, rest of the data is null
+                if raw_weather.Hourly.Surface_pressure[i+1] > 0 {
+                    days = append(days, DayWeather{})
+                } else {
+                    break
+                }
+            }
         }
     }
     // Populate metadata
@@ -302,9 +307,10 @@ func mapOmDays(raw_weather om.WeatherRange) WeekWeather {
  */
 func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
     var day_no int = 0
-    hours := make([]WeatherData, 0, 8)
+    hours := make([]WeatherData, 0, 24)
     for i:=0 ; i< len(raw_weather.Hourly.Time) ; i++ {
-        _, hour := convertTime(raw_weather.Hourly.Time[i])
+        day, hour := convertTime(raw_weather.Hourly.Time[i])
+        fmt.Printf("Day %v Hour %v:00\n", day, hour)
         // Trim away past hours
         if timeInPast(raw_weather.Hourly.Time[i]) {
             continue
@@ -373,7 +379,7 @@ func populateOmData(target *WeatherData, source *om.WeatherRange, index int) {
     target.Temp.Feels    = source.Hourly.Apparent_temperature[index]
     target.Temp.Bulb     = source.Hourly.Wet_bulb_temperature_2m[index]
     target.Uv            = source.Hourly.Uv_index[index]
-    target.Pressure      = toInt(source.Hourly.Surface_pressure[index])
+    target.Pressure      = toInt(source.Hourly.Pressure_msl[index])
     target.Humidity      = float32(source.Hourly.Relative_humidity_2m[index])
     //target.Description   = source.Weather[0].Description[index]
     target.Clouds.Clouds = uint(source.Hourly.Cloud_cover[index])
