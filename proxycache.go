@@ -70,26 +70,26 @@ func GetOwmProxyWeather(city string) (owm.WeatherRange, error) {
     return r_obj, nil
 }
 
-func GetOmProxyWeather(city string) (om.WeatherRange, error) {
+func GetOmProxyWeather(city string) (om.WeatherRange, float32, float32, error) {
     var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather om.WeatherRange
         err := errors.New(fmt.Sprintf("r:%4vu:%4v: City [%s] not found", rqNum, uniqRqNum, city))
         log.Println(err)
-        return emptyWeather, err
+        return emptyWeather, 0.0, 0.0, err
     }
     var r_obj om.WeatherRange
     var ok bool
     r_obj, ok = searchOmCacheWeather(requestId(city, CONFIG.MODEL))        // Check cache
     if ok {
         log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f\n", rqNum, uniqRqNum, city, lat, lon)
-        return r_obj, nil
+        return r_obj, 0.0, 0.0, nil
     }
     uniqRqNum++
     log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f (New request)\n", rqNum, uniqRqNum, city, lat, lon)
     r_obj = om.Forecast(lat, lon)                 // Make request
     addOmCacheWeather(requestId(city, CONFIG.MODEL), r_obj)                // Cache response
-    return r_obj, nil
+    return r_obj, lat, lon, nil
 }
 
 func GetProxyIcon(id string) []byte {

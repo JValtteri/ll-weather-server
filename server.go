@@ -66,9 +66,10 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
         r_obj, err = GetOwmProxyWeather(city)
         f_obj = mapOwmDays(r_obj)
     } else {
+        var lat, lon float32
         var r_obj om.WeatherRange
-        r_obj, err = GetOmProxyWeather(city)
-        f_obj = mapOmDays(r_obj)
+        r_obj, lat, lon, err = GetOmProxyWeather(city)
+        f_obj = mapOmDays(r_obj, strings.Title(city), lat, lon)
     }
     setCorrs(w)
     if err != nil {
@@ -99,7 +100,7 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
         f_obj = mapOwmHours(r_obj, dayNumber)
     } else {
         var r_obj om.WeatherRange
-        r_obj, err = GetOmProxyWeather(city)
+        r_obj, _, _, err = GetOmProxyWeather(city)
         f_obj = mapOmHours(r_obj, dayNumber)
     }
     setCorrs(w)

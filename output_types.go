@@ -215,7 +215,7 @@ func mapOwmHours(raw_weather owm.WeatherRange, dayIndex int) DayHours {
 
 /* Maps raw_weather data from OM in to a WeekWeather struct
  */
-func mapOmDays(raw_weather om.WeatherRange) WeekWeather {
+func mapOmDays(raw_weather om.WeatherRange, city string, lat float32, lon float32) WeekWeather {
     // Expected timeslots hourly
     // 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 (24/0)
     var week WeekWeather
@@ -300,6 +300,9 @@ func mapOmDays(raw_weather om.WeatherRange) WeekWeather {
     //week.City = raw_weather.City.Name
     week.Timestamp = uint(time.Now().Unix())
     week.Days = days
+    week.City = city
+    week.Coord.Lat = lat
+    week.Coord.Lon = lon
     return week
 }
 
@@ -309,8 +312,7 @@ func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
     var day_no int = 0
     hours := make([]WeatherData, 0, 24)
     for i:=0 ; i< len(raw_weather.Hourly.Time) ; i++ {
-        day, hour := convertTime(raw_weather.Hourly.Time[i])
-        fmt.Printf("Day %v Hour %v:00\n", day, hour)
+        _, hour := convertTime(raw_weather.Hourly.Time[i])
         // Trim away past hours
         if timeInPast(raw_weather.Hourly.Time[i]) {
             continue
