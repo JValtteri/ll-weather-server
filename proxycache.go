@@ -83,7 +83,7 @@ func GetOmProxyWeather(city string) (om.WeatherRange, float32, float32, error) {
     r_obj, ok = searchOmCacheWeather(requestId(city, CONFIG.MODEL))        // Check cache
     if ok {
         log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f\n", rqNum, uniqRqNum, city, lat, lon)
-        return r_obj, 0.0, 0.0, nil
+        return r_obj, lat, lon, nil
     }
     uniqRqNum++
     log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f (New request)\n", rqNum, uniqRqNum, city, lat, lon)

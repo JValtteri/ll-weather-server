@@ -66,7 +66,9 @@ function activateUI() {
     dayTitle.setAttribute("hidden", "");        // Hide hour forecast title
     hoursForecast.setAttribute("hidden", "");   // Hide hour forecast table
     hoursForecast.innerHTML = "";               // Clear hour forecast table
-    cityTitle.textContent = weekData.City;
+    let lat = weekData.Coord.Lat.toFixed(2);
+    let lon = weekData.Coord.Lon.toFixed(2);
+    cityTitle.textContent = `${weekData.City}  –  ${lat}°, ${lon}°`;
     table.populateTable(weekData.Days, daysForecast, str_tf());
 }
 
@@ -133,7 +135,7 @@ async function reloadForecast(){
     await fetchWeatherData();
     table.populateTable(weekData.Days, daysForecast, str_tf());
     if (!hoursForecast.hasAttribute("hidden")) {
-        fetchWeatherDetail();
+        await fetchWeatherDetail();
     }
 }
 
