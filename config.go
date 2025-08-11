@@ -19,6 +19,7 @@ type Config struct {
     CACHE_AGE        uint  // Hours
     CACHE_SIZE       int
     MODEL            string
+    LENGTH           string
 }
 
 type ApiKeys struct {
@@ -43,7 +44,7 @@ func LoadConfig() {
     unmarshal(raw_config, &API_KEYS)
     log.Println("Loaded API keys")
     owm.Config(API_KEYS.OPENWEATHERMAP, CONFIG.UNITS, CONFIG.COUNTRY_CODE)
-    om.Config(""                     , CONFIG.UNITS, CONFIG.MODEL)
+    om.Config(""                     , CONFIG.UNITS, CONFIG.MODEL, CONFIG.LENGTH)
 }
 
 func readConfig(fileName string) []byte {

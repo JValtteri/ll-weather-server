@@ -120,7 +120,7 @@ func modelChangeRequest(w http.ResponseWriter, request *http.Request) {
     }
     // TODO:  ADD whitelist to catch any funnybusiness
     CONFIG.MODEL = model
-    om.Config("", CONFIG.UNITS, CONFIG.MODEL)  // Update to use the requested model
+    om.Config("", CONFIG.UNITS, CONFIG.MODEL, CONFIG.LENGTH)  // Update to use the requested model
     log.Printf("r:%6vu:%4v: Get Model: %s\n", rqNum, uniqRqNum, model)
 }
 
