@@ -120,7 +120,7 @@ function toggleFullscreen() {
     } else {
         document.exitFullscreen();
         if (cookieConsent.checked === true) {
-            cookie.setCookie("fullscreen", "");
+            localStorage.setItem("fullscreen", "")
         }
     }
 }
@@ -129,7 +129,7 @@ function makeFullscreen() {
     document.querySelector("body").requestFullscreen()
                                   .catch((TypeError) => {});
     if (cookieConsent.checked === true) {
-        cookie.setCookie("fullscreen", "true", ttl*DAY);
+        localStorage.setItem("fullscreen", "true")
     }
 }
 
@@ -203,11 +203,10 @@ modelInput.addEventListener("change", () => {
 cookieConsent.addEventListener('click', () => {
     if (cookieConsent.checked) {
         cookie.setCookie("city", base64(cityInput.value), ttl*DAY);
-        cookie.setCookie("consent", "true", ttl*DAY);
+        localStorage.setItem("consent", "true");
     } else {
         cookie.setCookie("city", "");       // Cookie is set as session cookie, so the browser should remove it after the session
-        cookie.setCookie("consent", "");
-        cookie.setCookie("fullscreen", "");
+        localStorage.clear();
     }
 });
 
@@ -221,7 +220,7 @@ fullscreenBtn.addEventListener("click", () => {
  */
 body.addEventListener("click", () => {
      if (cookieConsent.checked) {
-        if (cookie.getCookie("fullscreen") === "true" ) {
+        if (localStorage.getItem("fullscreen") === "true" ) {
             makeFullscreen();
         }
     }
@@ -249,14 +248,14 @@ daysForecast.addEventListener("click", function(event) {
 });
 
 // Check concent from cookie
-if (cookie.getCookie("consent") === "true" ) {
+if (localStorage.getItem("consent") === "true" ) {
     cookieConsent.checked = true
     modelInput.value = decode64(cookie.getCookie("model"))
 }
 
 // Auto search if concented
 if (cookieConsent.checked) {
-    if (cookie.getCookie("fullscreen") === "true" ) {
+    if (localStorage.getItem("fullscreen") === "true" ) {
         makeFullscreen();
     }
     cookieConsent.checked = true;
