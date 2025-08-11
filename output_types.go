@@ -317,6 +317,14 @@ func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
         if timeInPast(raw_weather.Hourly.Time[i]) {
             continue
         }
+
+        if len(raw_weather.Hourly.Surface_pressure) > i+3 {
+            // If pressure shows zero, rest of the data is null
+            if raw_weather.Hourly.Surface_pressure[i+1] == 0 {
+                break
+            }
+        }
+        
         if dayIndex == day_no {
             var hourData WeatherData
             hourData.Title = fmt.Sprintf("%v:00", hour)
