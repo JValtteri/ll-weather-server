@@ -64,13 +64,13 @@ func GetOwmProxyWeather(city string) (owm.WeatherRange, error) {
     }
     uniqRqNum++
     log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f (New request)\n", rqNum, uniqRqNum, city, lat, lon)
-    r_obj = owm.Forecast(lat, lon)              // Make request
+    r_obj = owm.Forecast(lat, lon)                       // Make request
     r_obj.Timestamp = uint(time.Now().Unix())
-    addOwmCacheWeather(city, r_obj)                // Cache response
+    addOwmCacheWeather(city, r_obj)                      // Cache response
     return r_obj, nil
 }
 
-func GetOmProxyWeather(city string) (om.WeatherRange, float32, float32, error) {
+func GetOmProxyWeather(city string, model string) (om.WeatherRange, float32, float32, error) {
     var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather om.WeatherRange
@@ -80,15 +80,15 @@ func GetOmProxyWeather(city string) (om.WeatherRange, float32, float32, error) {
     }
     var r_obj om.WeatherRange
     var ok bool
-    r_obj, ok = searchOmCacheWeather(requestId(city, CONFIG.MODEL))        // Check cache
+    r_obj, ok = searchOmCacheWeather(requestId(city, model))        // Check cache
     if ok {
-        log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f\n", rqNum, uniqRqNum, city, lat, lon)
+        log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f, model: %s\n", rqNum, uniqRqNum, city, lat, lon, model)
         return r_obj, lat, lon, nil
     }
     uniqRqNum++
-    log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f (New request)\n", rqNum, uniqRqNum, city, lat, lon)
-    r_obj = om.Forecast(lat, lon)                 // Make request
-    addOmCacheWeather(requestId(city, CONFIG.MODEL), r_obj)                // Cache response
+    log.Printf("r:%6vu:%4v: Get weather: %s at %.3f %.3f, model: %s (New request)\n", rqNum, uniqRqNum, city, lat, lon, model)
+    r_obj = om.Forecast(lat, lon, model, CONFIG.LENGTH, CONFIG.UNITS)   // Make request
+    addOmCacheWeather(requestId(city, model), r_obj)                    // Cache response
     return r_obj, lat, lon, nil
 }
 

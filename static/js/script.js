@@ -42,6 +42,12 @@ function base64(str) {
     return btoa(String.fromCharCode(...utf8Bytes));
 }
 
+/* Converts Base64 to str, via uint8
+ */
+function decode64(str) {
+    return atob(str);
+}
+
 /* Makes a request for weather data and populates the table with the data
  * cityName: str:  Name of the city to search
  * returns:  bool: ok
@@ -75,15 +81,21 @@ function activateUI() {
  */
 async function submitCity() {
     if (cityInput.value && cityInput.value != "City") {
-        if (cookieConsent.checked) {
-            cookie.setCookie("city", base64(cityInput.value), ttl*DAY);
-        } else {
-            cookie.setCookie("city", base64(cityInput.value));   // Cookie expires in one second
-        }
+        prepCookies();
         let ok = await fetchWeatherData();
         if (ok === true) {
             activateUI();
         }
+    }
+}
+
+function prepCookies() {
+    if (cookieConsent.checked) {
+        cookie.setCookie("city", base64(cityInput.value), ttl*DAY);
+        cookie.setCookie("model", base64(modelInput.value), ttl*DAY);
+    } else {
+        cookie.setCookie("city", base64(cityInput.value));   // Cookie expires in one second
+        cookie.setCookie("model", base64(modelInput.value));
     }
 }
 
@@ -97,15 +109,6 @@ async function fetchWeatherDetail() {
         if (!response.ok) throw new Error('Network response was not ok');
         hourData = await response.json();
         table.populateTable(hourData.Hours, hoursForecast, '');
-    } catch (error) {
-        console.error('There has been a problem with your fetch operation:', error);
-    }
-}
-
-async function loadNewForecastModel(model) {
-    try {
-        const response = await fetch(`model?model=${base64(model)}`);
-        if (!response.ok) throw new Error('Network response was not ok');
     } catch (error) {
         console.error('There has been a problem with your fetch operation:', error);
     }
@@ -131,6 +134,7 @@ function makeFullscreen() {
 }
 
 async function reloadForecast(){
+    prepCookies()
     await fetchWeatherData();
     table.populateTable(weekData.Days, daysForecast, str_tf());
     if (!hoursForecast.hasAttribute("hidden")) {
@@ -191,7 +195,6 @@ cityInput.addEventListener('keydown', (event) => {
 /* Weather model changed
  */
 modelInput.addEventListener("change", () => {
-    loadNewForecastModel(modelInput.value);
     reloadForecast();
 })
 
@@ -248,6 +251,7 @@ daysForecast.addEventListener("click", function(event) {
 // Check concent from cookie
 if (cookie.getCookie("consent") === "true" ) {
     cookieConsent.checked = true
+    modelInput.value = decode64(cookie.getCookie("model"))
 }
 
 // Auto search if concented

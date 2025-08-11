@@ -24,7 +24,6 @@ func server() {
     http.Handle("/js/",  http.StripPrefix("/js/",  http.FileServer(http.Dir("./static/js"))))
     http.HandleFunc("/city",        cityOverviewRequest)
     http.HandleFunc("/city/detail", cityDetailRequest)
-    http.HandleFunc("/model",       modelChangeRequest)
     if CONFIG.ENABLE_TLS {
         log.Fatal(http.ListenAndServeTLS(
             fmt.Sprintf( ":%s", CONFIG.SERVER_PORT),
@@ -55,9 +54,15 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     rqNum++
     var f_obj WeekWeather
     var city string  = getCookie(request, "city")
+    var model string  = getCookie(request, "model")
     var legacy string = sanitize(getCookie(request, "alternate"))
     city = sanitize(decode64(city))
+    model = decode64(model)
     if city == "" {
+        return
+    }
+    if !whitelist(model, modelList) {
+        log.Printf("r:%6vu:%4v: Bad Model: %s\n", rqNum, uniqRqNum, model)
         return
     }
     var err error
@@ -68,7 +73,7 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
     } else {
         var lat, lon float32
         var r_obj om.WeatherRange
-        r_obj, lat, lon, err = GetOmProxyWeather(city)
+        r_obj, lat, lon, err = GetOmProxyWeather(city, model)
         f_obj = mapOmDays(r_obj, strings.Title(city), lat, lon)
     }
     setCorrs(w)
@@ -83,9 +88,15 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     rqNum++
     var f_obj DayHours
     var city string  = getCookie(request, "city")
+    var model string  = getCookie(request, "model")
     var legacy string = sanitize(getCookie(request, "alternate"))
     city = sanitize(decode64(city))
+    model = decode64(model)
     if city == "" {
+        return
+    }
+    if !whitelist(model, modelList) {
+        log.Printf("r:%6vu:%4v: Bad Model: %s\n", rqNum, uniqRqNum, model)
         return
     }
     var dayNo string = sanitize(request.URL.Query().Get("day"))
@@ -100,7 +111,7 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
         f_obj = mapOwmHours(r_obj, dayNumber)
     } else {
         var r_obj om.WeatherRange
-        r_obj, _, _, err = GetOmProxyWeather(city)
+        r_obj, _, _, err = GetOmProxyWeather(city, model)
         f_obj = mapOmHours(r_obj, dayNumber)
     }
     setCorrs(w)
@@ -109,19 +120,6 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     }
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprintf(w, unloadJSON(f_obj))
-}
-
-func modelChangeRequest(w http.ResponseWriter, request *http.Request) {
-    rqNum++
-    var model string = decode64(request.URL.Query().Get("model"))
-    if !whitelist(model, modelList) {
-        log.Printf("r:%6vu:%4v: Bad Model: %s\n", rqNum, uniqRqNum, model)
-        return
-    }
-    // TODO:  ADD whitelist to catch any funnybusiness
-    CONFIG.MODEL = model
-    om.Config("", CONFIG.UNITS, CONFIG.MODEL, CONFIG.LENGTH)  // Update to use the requested model
-    log.Printf("r:%6vu:%4v: Get Model: %s\n", rqNum, uniqRqNum, model)
 }
 
 func getCookie(request *http.Request, cookieName string) string {
@@ -151,7 +149,7 @@ func sanitize(input string) string {
     var result strings.Builder
     for i := 0; i < len(input); {
         r, size := utf8.DecodeRuneInString(input[i:])
-        if unicode.IsSpace(r) || unicode.IsLetter(r) || unicode.IsDigit(r) {
+        if unicode.IsSpace(r) || unicode.IsLetter(r) || unicode.IsDigit(r) || r=='-' {
             result.WriteRune(r)
             i += size
         } else {

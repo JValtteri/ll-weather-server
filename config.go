@@ -44,7 +44,7 @@ func LoadConfig() {
     unmarshal(raw_config, &API_KEYS)
     log.Println("Loaded API keys")
     owm.Config(API_KEYS.OPENWEATHERMAP, CONFIG.UNITS, CONFIG.COUNTRY_CODE)
-    om.Config(""                     , CONFIG.UNITS, CONFIG.MODEL, CONFIG.LENGTH)
+    om.Config(""                     , CONFIG.UNITS)
 }
 
 func readConfig(fileName string) []byte {

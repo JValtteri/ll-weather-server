@@ -1,4 +1,4 @@
-github.com/JValtteri/weather/om v0.0.0-20250811001522-15b7ed0a8f23 h1:j6lD6SDx9FbuGvQ325y6t9nMnPXhPnxVQ1utploBSd8=
-github.com/JValtteri/weather/om v0.0.0-20250811001522-15b7ed0a8f23/go.mod h1:MD8aFCSPl9F1tL1gxkafz8WQDCraDoJpV4mLIHcZiXQ=
-github.com/JValtteri/weather/owm v0.0.0-20250811001522-15b7ed0a8f23 h1:wWLH/bXIhRm2/eKB8xbPxRV8onh1PkmoCZIaK+H/Hwo=
-github.com/JValtteri/weather/owm v0.0.0-20250811001522-15b7ed0a8f23/go.mod h1:odFyfOZhQZbeFgHS1Pc+i39atigSy5Wq7sJtUA5hgjs=
+github.com/JValtteri/weather/om v0.0.0-20250811143028-3bc47b8dfb36 h1:LAQAKzAcI0jm8DhiEcnziKyeM97a+Bsp+mceqlHQr9I=
+github.com/JValtteri/weather/om v0.0.0-20250811143028-3bc47b8dfb36/go.mod h1:MD8aFCSPl9F1tL1gxkafz8WQDCraDoJpV4mLIHcZiXQ=
+github.com/JValtteri/weather/owm v0.0.0-20250811143028-3bc47b8dfb36 h1:MzJ12uOD0VboffjghrBhFLDMvLz+E5K2KG7b8stMljo=
+github.com/JValtteri/weather/owm v0.0.0-20250811143028-3bc47b8dfb36/go.mod h1:odFyfOZhQZbeFgHS1Pc+i39atigSy5Wq7sJtUA5hgjs=
