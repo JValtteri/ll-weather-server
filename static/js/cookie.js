@@ -1,6 +1,8 @@
-
-/* Cookie(s)
+/*
+ * Cookie(s)
  */
+
+export const ttl = 30;     // cookie max life
 
 /* Creates a new cookie
  * name: str: cookie name
@@ -46,5 +48,15 @@ export function clearSiteCookies() {
 
         // Set the cookie with an expiration date in the past
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    }
+}
+
+export function prepCookies(concent, city, model, ttl) {
+    if (concent) {
+        setCookie("city", city, ttl);
+        setCookie("model", model, ttl);
+    } else {
+        setCookie("city", city);   // Cookie expires in one second
+        setCookie("model", model);
     }
 }
