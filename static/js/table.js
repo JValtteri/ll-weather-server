@@ -1,4 +1,4 @@
-import * as color from "./color.js?id=MTc1NDY0OTQ4Ng==";
+import * as color from "./color.js?id=MTc1NTAwODMzOQ";
 
 
 /* Function to construct a path to a specific element in JSON
@@ -197,16 +197,17 @@ export function populateTable(days, table, path) {
     populateRow(days, table, 'td', diffuse,    "Diffuse",    addInt, ' W/m²', '', "radiation");
 
     populateRow(days, table, 'td', clouds,     "Clouds %",   addInt, ' %', "clouds");      // Total
-    populateRow(days, table, 'td', cloudsLo,   "Low %",      addInt, ' %', '', "clouds");
-    populateRow(days, table, 'td', cloudsMed,  "Med %",      addInt, ' %', '', "clouds");
     populateRow(days, table, 'td', cloudsHigh, "High %",     addInt, ' %', '', "clouds");
+    populateRow(days, table, 'td', cloudsMed,  "Med %",      addInt, ' %', '', "clouds");
+    populateRow(days, table, 'td', cloudsLo,   "Low %",      addInt, ' %', '', "clouds");
+
+    populateRow(days, table, 'td', pressure,   "Pressure",    addInt, ' hPa', '', "clouds");
+    populateRow(days, table, 'td', humidity,   "Humidity",    addInt, ' %', '', "clouds");
 
     populateRow(days, table, 'td', visibility, "Visibility", addInt, " m", '', "clouds");
 
     populateRow(days, table, 'td', chance,     "Rain%",      addFloat, ' %');                // Chance
-    populateRow(days, table, 'td', amount,     "Rain [mm]",  addFloat, ' mm', "atmo");       // Total
-    populateRow(days, table, 'td', pressure,   "Pressure",    addInt, ' hPa', '', "atmo");
-    populateRow(days, table, 'td', humidity,   "Humidity",    addInt, ' %', '', "atmo");
+    populateRow(days, table, 'td', amount,     "Rain [mm]",  addFloat, ' mm');       // Total
 
     populateRow(days, table, 'td', speed,      "Wind",       addInt, ' m/s', "wind");
     populateRow(days, table, 'td', gust,       "Gust",       addInt, ' m/s', "", "wind");

@@ -66,23 +66,34 @@ function applyColorRow(table, row, func) {
     });
 }
 
+function idByTitle(table, name) {
+
+    for ( let i=0 ; i < table.rows.length ; i++ ) {
+        const text = table.rows[i].cells[0].innerText.split(" ")[0].trim();
+        if (text === name) {
+            return i;
+        }
+    }
+    console.error(`Name: "${name}" not found in table`);
+}
+
 /*
  * Applies highlight colors to an entire table
  */
 export function applyColors(table) {
-    applyColorRow(table, 3, colorTemp);
-    applyColorRow(table, 4, colorTemp);
-    applyColorRow(table, 5, colorTemp);
+    applyColorRow(table, idByTitle(table, "Temp."), colorTemp);
+    applyColorRow(table, idByTitle(table, "Feels"), colorTemp);
+    applyColorRow(table, idByTitle(table, "Wet"), colorTemp);
 
-    applyColorRow(table, 9, colorCloud);
-    applyColorRow(table, 10, colorCloud);
-    applyColorRow(table, 11, colorCloud);
-    applyColorRow(table, 12, colorCloud);
+    applyColorRow(table, idByTitle(table, "Clouds"), colorCloud);
+    applyColorRow(table, idByTitle(table, "Low"), colorCloud);
+    applyColorRow(table, idByTitle(table, "Med"), colorCloud);
+    applyColorRow(table, idByTitle(table, "High"), colorCloud);
 
-    applyColorRow(table, 14, colorRainChance);
-    applyColorRow(table, 15, colorRain);
-    applyColorRow(table, 18, colorWind);
-    applyColorRow(table, 19, colorWind);
+    applyColorRow(table, idByTitle(table, "Rain%"), colorRainChance);
+    applyColorRow(table, idByTitle(table, "Rain"), colorRain);
+    applyColorRow(table, idByTitle(table, "Wind"), colorWind);
+    applyColorRow(table, idByTitle(table, "Gust"), colorWind);
 }
 
 export function colorSun(element, sunUp) {
@@ -92,3 +103,5 @@ export function colorSun(element, sunUp) {
         element.classList.remove('night');   // This should be unnecessary
     }
 }
+
+
