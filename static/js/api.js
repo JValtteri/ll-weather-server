@@ -16,7 +16,10 @@ export async function fetchWeatherData() {
     try {
         const request = `city`;
         const response = await fetch(request);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (response.status != 200) {
+            console.log(response.status);
+            throw new Error('Network response was not 200')
+        }
         weekData = await response.json();
     } catch (error) {
         return false;

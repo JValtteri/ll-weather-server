@@ -1,4 +1,4 @@
-import * as ui from "./ui.js?id=MTc1ODMxMTA5MA"
+import * as ui from "./ui.js?id=MTc1ODMxODUzNA"
 
 const body          = document.getElementById('body');
 
@@ -6,6 +6,15 @@ const body          = document.getElementById('body');
  * Events
  */
 
+
+/* Writing on city input
+ */
+ui.cityInput.addEventListener("keyup", (event) => {
+    // Ignore special keys
+    if (event.key.length === 1) {
+        ui.suggest(ui.cityInput.value);
+    }
+});
 
 /* Submit button
  */
@@ -29,6 +38,7 @@ ui.dayButton.addEventListener("click", () => {
  */
 ui.cityInput.addEventListener("click", () => {
     ui.cityInput.value = "";
+    ui.populateSearchHistory();
 });
 
 /* Search on Enter key
@@ -82,4 +92,5 @@ if (ui.cookieConsent.checked) {
     }
     ui.cookieConsent.checked = true;
     ui.loadWeek();
+    ui.updateSuggestions();
 }

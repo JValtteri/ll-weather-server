@@ -1,6 +1,6 @@
 import * as cookie from "./cookie.js?id=MTc1NDk1NDIwMA"
-import * as api from "./api.js?id=MTc1NDk1NDIwMA"
-import * as util from "./utils.js?id=MTc1NTAwODMzOQ"
+import * as api from "./api.js?id=MTc1ODMxODUzNA"
+import * as util from "./utils.js?id=MTc1ODMxODUzNA"
 import * as table from "./table.js?id=MTc1NDk1NDIwMA"
 
 /*
@@ -11,9 +11,12 @@ import * as table from "./table.js?id=MTc1NDk1NDIwMA"
 export const cityInput     = document.getElementById('city-name');
 export const cookieConsent = document.getElementById('accept');
 export const modelInput    = document.getElementById('model');
+export const citiesLst     = document.getElementById('cities');
+
 // Tables
 export const daysForecast  = document.getElementById("days-forecast");
 export const hoursForecast = document.getElementById("hours-forecast");
+
 // Titles
 export const cityTitle     = document.getElementById("city-name-title");
 export const dayTitle      = document.getElementById("day-title");
@@ -26,6 +29,7 @@ export const reloadBtn     = document.getElementById('reload');
 
 const logo                 = document.getElementById('logo');
 
+let cities = [];
 let timeframe = 1;  // 1 = Day, 0 = Night
 
 
@@ -36,18 +40,22 @@ export async function submitCity() {
         let city = util.base64(cityInput.value);
         let model = util.base64(modelInput.value);
         cookie.prepCookies(cookieConsent.checked, city, model, cookie.ttl*util.DAY);
-        loadWeek();
+        const ok = await loadWeek();
+        if ( ok ) {
+            util.saveSearchEntry(city);
+        }
     }
 }
 
 export async function loadWeek() {
     cityInput.value = util.decode64(cookie.getCookie("city"));
     logo.removeAttribute("hidden");
-    let ok = await api.fetchWeatherData();
-    if (ok ) {
+    const ok = await api.fetchWeatherData();
+    if (ok) {
         activateUI();
     }
     logo.setAttribute("hidden", "");
+    return ok;
 }
 
 export function toggleFullscreen() {
@@ -124,6 +132,31 @@ export function fullscreenPrefrence() {
             makeFullscreen();
         }
     }
+}
+
+export function populateSearchHistory() {
+    citiesLst.innerHTML = '';
+    util.populateSearchHistory(citiesLst);
+}
+
+export function updateSuggestions() {
+    cities = util.loadSearchHistory();
+}
+
+export function suggest(value) {
+    updateSuggestions();
+    if (value != "") {
+        citiesLst.innerHTML = '';
+    }
+    cities.forEach( city => {
+        // Comparing if value is a fragment of a city
+        if ((( util.decode64(city).toLowerCase()).indexOf(value.toLowerCase())) > -1) {
+            let node = document.createElement("option");
+            let val = document.createTextNode(util.decode64(city));
+            node.appendChild(val);
+            citiesLst.appendChild(node);
+        }
+    });
 }
 
 function activateUI() {
