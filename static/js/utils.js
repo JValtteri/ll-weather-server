@@ -86,7 +86,6 @@ function populateSelect(element, json, func) {
 function suggestionInsert(element, json, item) {
     const name = json[item];
     const option = document.createElement('option');
-    option.innerText = decode64(name);
     option.value = decode64(name);
     element.appendChild(option);
 }
