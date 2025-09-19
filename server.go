@@ -22,6 +22,7 @@ func server() {
     http.HandleFunc("/", defaultRequest)
     http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./static/css"))))
     http.Handle("/js/",  http.StripPrefix("/js/",  http.FileServer(http.Dir("./static/js"))))
+    http.Handle("/assets/",  http.StripPrefix("/assets/", http.FileServer(http.Dir("./static/assets"))))
     http.HandleFunc("/city",        cityOverviewRequest)
     http.HandleFunc("/city/detail", cityDetailRequest)
     if CONFIG.ENABLE_TLS {

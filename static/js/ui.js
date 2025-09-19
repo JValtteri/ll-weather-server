@@ -24,6 +24,8 @@ export const dayButton     = document.getElementById("day-night");
 export const fullscreenBtn = document.getElementById('fullscreen');
 export const reloadBtn     = document.getElementById('reload');
 
+const logo                 = document.getElementById('logo');
+
 let timeframe = 1;  // 1 = Day, 0 = Night
 
 
@@ -39,10 +41,13 @@ export async function submitCity() {
 }
 
 export async function loadWeek() {
+    cityInput.value = util.decode64(cookie.getCookie("city"));
+    logo.removeAttribute("hidden");
     let ok = await api.fetchWeatherData();
     if (ok ) {
         activateUI();
     }
+    logo.setAttribute("hidden", "");
 }
 
 export function toggleFullscreen() {
@@ -60,7 +65,7 @@ export async function reloadForecast(){
     let city = cookie.getCookie("city");
     let model = util.base64(modelInput.value);
     cookie.prepCookies(cookieConsent.checked, city, model, cookie.ttl*util.DAY);
-    await api.fetchWeatherData();
+    loadWeek();
     table.populateTable(api.weekData.Days, daysForecast, util.str_tf(timeframe));
     if (!hoursForecast.hasAttribute("hidden")) {
         await api.fetchWeatherDetail();
