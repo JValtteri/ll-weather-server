@@ -4,6 +4,8 @@ import (
     "fmt"
     "log"
     "time"
+    "sync"
+
     "github.com/JValtteri/weather/owm"
     "github.com/JValtteri/weather/om"
 )
@@ -29,7 +31,14 @@ func omUnwrap(wrapper OmWrapper) (om.WeatherRange, uint) {
     return wrapper.data, wrapper.dt
 }
 
-var owmWeatherCache map[string]owm.WeatherRange  = make(map[string]owm.WeatherRange)
+// Cache Locks //
+var omLock sync.RWMutex                   = sync.RWMutex{}
+var omwLock sync.RWMutex                  = sync.RWMutex{}
+var cityLock sync.RWMutex                 = sync.RWMutex{}
+var iconLock sync.RWMutex                 = sync.RWMutex{}
+
+// Cache data //
+var owmWeatherCache map[string]owm.WeatherRange = make(map[string]owm.WeatherRange)
 var omWeatherCache map[string]OmWrapper   = make(map[string]OmWrapper)
 var cityCache map[string]Coords           = make(map[string]Coords)
 var iconCache map[string][]byte           = make(map[string][]byte)
@@ -107,6 +116,8 @@ func GetProxyIcon(id string) []byte {
 }
 
 func addCacheCity(key string, lat, lon float32) {
+    cityLock.Lock()
+    defer cityLock.Unlock()
     var coords Coords
     coords.lat = lat
     coords.lon = lon
@@ -119,6 +130,8 @@ func addCacheCity(key string, lat, lon float32) {
 }
 
 func searchCacheCity(key string) (float32, float32, bool) {
+    cityLock.RLock()
+    defer cityLock.RUnlock()
     var coords Coords
     var ok bool
     coords, ok = cityCache[key]
@@ -129,6 +142,8 @@ func searchCacheCity(key string) (float32, float32, bool) {
 }
 
 func addOwmCacheWeather(key string, r_obj owm.WeatherRange) {
+    omwLock.Lock()
+    defer omwLock.Unlock()
     if len(owmWeatherCache) < CONFIG.CACHE_SIZE {
         owmWeatherCache[key] = r_obj
     } else {
@@ -138,6 +153,8 @@ func addOwmCacheWeather(key string, r_obj owm.WeatherRange) {
 }
 
 func addOmCacheWeather(key string, r_obj om.WeatherRange) {
+    omLock.Lock()
+    defer omLock.Unlock()
     var wrapper OmWrapper = omWrap(r_obj)
     if len(omWeatherCache) < CONFIG.CACHE_SIZE {
         omWeatherCache[key] = wrapper
@@ -159,6 +176,8 @@ func cullMap[V Coords | owm.WeatherRange | om.WeatherRange | OmWrapper | []byte 
 }
 
 func searchOwmCacheWeather(key string) (owm.WeatherRange, bool) {
+    omwLock.Lock()
+    defer omwLock.Unlock()
     var r_obj owm.WeatherRange
     var ok bool
     r_obj, ok = owmWeatherCache[key]
@@ -174,6 +193,8 @@ func searchOwmCacheWeather(key string) (owm.WeatherRange, bool) {
 }
 
 func searchOmCacheWeather(key string) (om.WeatherRange, bool) {
+    omLock.Lock()
+    defer omLock.Unlock()
     var r_obj om.WeatherRange
     var dt uint
     var wrapper OmWrapper
@@ -196,6 +217,8 @@ func searchOmCacheWeather(key string) (om.WeatherRange, bool) {
 }
 
 func addCacheIcon(key string, data []byte) {
+    iconLock.Lock()
+    defer iconLock.Unlock()
     if len(iconCache) < CONFIG.CACHE_SIZE {
         iconCache[key] = data
     } else {
@@ -205,6 +228,8 @@ func addCacheIcon(key string, data []byte) {
 }
 
 func searchCacheIcon(key string) ([]byte, bool) {
+    iconLock.RLock()
+    defer iconLock.RUnlock()
     var data []byte
     var ok bool
     data, ok = iconCache[key]
