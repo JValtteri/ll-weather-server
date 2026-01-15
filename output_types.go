@@ -244,35 +244,32 @@ func mapOmDays(raw_weather om.WeatherRange, city string, lat float32, lon float3
             newDay = false
 
         }
-        switch hour {
-            case 12:
-                // Populate 12:00 data
-                days[day_no].DayName = dayName
-                populateOmData(&days[day_no].Day, &raw_weather, i, dayName, maxChance, rainSum)
-            case 15:
-                // Set final day rain
-                days[day_no].Day.Rain.Chance   = maxChance
-                days[day_no].Day.Rain.Amount   = rainSum
-                // Start counting night rain
-                maxChance = 0
-                rainSum = 0
-            case 23:
-                // Populate 21:00 data
-                days[day_no].DayName = dayName
-                populateOmData(&days[day_no].Night, &raw_weather, i, dayName, maxChance, rainSum)
-            case 0:
-                days[day_no].DayName = dayName
-                populateOmData(&days[day_no].Night, &raw_weather, i, dayName, maxChance, rainSum)
-                day_no += 1
-                newDay = true
-                if len(raw_weather.Hourly.Surface_pressure) > i+3 {
-                    // If pressure shows zero, rest of the data is null
-                    if raw_weather.Hourly.Surface_pressure[i+1] > 0 {
-                        days = append(days, DayWeather{})
-                    } else {
-                        break
-                    }
-                }
+        if hour == 12 {
+            // Populate 12:00 data
+            days[day_no].DayName = dayName
+            populateOmData(&days[day_no].Day, &raw_weather, i, dayName, maxChance, rainSum)
+        } else if hour == 15 {
+            // Set final day rain
+            days[day_no].Day.Rain.Chance   = maxChance
+            days[day_no].Day.Rain.Amount   = rainSum
+            // Start counting night rain
+            maxChance = 0
+            rainSum = 0
+        } else if hour == 23 {
+            // Populate 21:00 data
+            days[day_no].DayName = dayName
+            populateOmData(&days[day_no].Night, &raw_weather, i, dayName, maxChance, rainSum)
+        } else if hour == 0 {
+            days[day_no].DayName = dayName
+            populateOmData(&days[day_no].Night, &raw_weather, i, dayName, maxChance, rainSum)
+            if len(raw_weather.Hourly.Surface_pressure) > i+3 && raw_weather.Hourly.Surface_pressure[i+1] > 0 {
+                // If pressure shows zero, rest of the data is null
+                days = append(days, DayWeather{})
+            } else {
+                break
+            }
+            day_no += 1
+            newDay = true
         }
     }
     // Populate metadata
