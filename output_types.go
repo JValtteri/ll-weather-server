@@ -5,12 +5,13 @@ package main
  */
 
 import (
-    "time"
+    "encoding/json"
     "fmt"
     "log"
-    "encoding/json"
-    "github.com/JValtteri/weather/owm"
+    "time"
+
     "github.com/JValtteri/weather/om"
+    "github.com/JValtteri/weather/owm"
 )
 
 type WeekWeather struct {
@@ -109,6 +110,9 @@ func mapOwmDays(raw_weather owm.WeatherRange) WeekWeather {
     var maxChance float32
     var day_no int = 0
     var newDay bool = true
+    var sunrise uint = raw_weather.City.Sunrise
+    var sunset uint = raw_weather.City.Sunset
+
     DT_OFFSET = raw_weather.City.Timezone       // Update tiemzone offset
     days := make([]DayWeather, 5, 8)
     for i:=0 ; i<len(raw_weather.List) ; i++ {
@@ -128,52 +132,41 @@ func mapOwmDays(raw_weather owm.WeatherRange) WeekWeather {
         if newDay {
             // Populate data for a day fragment
             days[day_no].DayName           = dayName
-            days[day_no].Day.Title         = dayName
-            days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
-            days[day_no].Day.Rain.Amount   = rainSum
-            days[day_no].Day.SunUp         = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
-            populateOwmData(&days[day_no].Day, &raw_weather.List[i])
+            populateOwmData(
+                &days[day_no].Day, &raw_weather.List[i], dayName, maxChance, rainSum, hour, sunrise, sunset,
+            )
             newDay = false
-
         }
-        if hour == 12 {
-            // Populate 12:00 data
-            days[day_no].DayName           = dayName
-            days[day_no].Day.Title         = dayName
-            days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
-            days[day_no].Day.Rain.Amount   = rainSum
-            days[day_no].Day.SunUp         = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
-            populateOwmData(&days[day_no].Day, &raw_weather.List[i])
-        } else if hour == 15 {
-            // Set final day rain
-            days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
-            days[day_no].Day.Rain.Amount   = rainSum
-            // Start counting night rain
-            maxChance = 0
-            rainSum = 0
-        } else if hour == 21 {
-            // Populate 21:00 data
-            days[day_no].DayName           = dayName
-            days[day_no].Night.Title       = dayName
-            days[day_no].Night.Rain.Chance = toInt(maxChance*100)
-            days[day_no].Night.Rain.Amount = rainSum
-            days[day_no].Night.SunUp         = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
-            populateOwmData(&days[day_no].Night, &raw_weather.List[i])
-            days[day_no].Night.Rain.Chance       = toInt(maxChance*100)
-            days[day_no].Night.Rain.Amount       = rainSum
-        } else if hour == 0 {
-            days[day_no].DayName           = dayName
-            days[day_no].Night.Title       = dayName
-            days[day_no].Night.Rain.Chance = toInt(maxChance*100)
-            days[day_no].Night.Rain.Amount = rainSum
-            days[day_no].Night.SunUp       = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
-            populateOwmData(&days[day_no].Night, &raw_weather.List[i])
-            days[day_no].Night.Rain.Chance       = toInt(maxChance*100)
-            days[day_no].Night.Rain.Amount       = rainSum
-            day_no += 1
-            newDay = true
-        } else {
-            // TODO: Make sure there is data for last night
+        switch hour {
+            case 12:
+                // Populate 12:00 data
+                days[day_no].DayName           = dayName
+                populateOwmData(
+                    &days[day_no].Day, &raw_weather.List[i], dayName, maxChance, rainSum, hour, sunrise, sunset,
+                )
+            case 15:
+                // Set final day rain
+                days[day_no].Day.Rain.Chance   = toInt(maxChance*100)
+                days[day_no].Day.Rain.Amount   = rainSum
+                // Start counting night rain
+                maxChance = 0
+                rainSum = 0
+            case 21:
+                // Populate 21:00 data
+                days[day_no].DayName           = dayName
+                populateOwmData(
+                    &days[day_no].Night, &raw_weather.List[i], dayName, maxChance, rainSum, hour, sunrise, sunset,
+                )
+            case 0:
+                days[day_no].DayName           = dayName
+                populateOwmData(
+                    &days[day_no].Night, &raw_weather.List[i], dayName, maxChance, rainSum, hour,
+                    raw_weather.City.Sunrise, raw_weather.City.Sunset,
+                )
+                day_no += 1
+                newDay = true
+            default:
+                // TODO: Make sure there is data for last night
         }
     }
     // Populate metadata
@@ -187,16 +180,20 @@ func mapOwmDays(raw_weather owm.WeatherRange) WeekWeather {
  */
 func mapOwmHours(raw_weather owm.WeatherRange, dayIndex int) DayHours {
     var day_no int = 0
+    var sunrise uint        = raw_weather.City.Sunrise
+    var sunset uint         = raw_weather.City.Sunset
     hours := make([]WeatherData, 0, 8)
-    for i:=0 ; i< len(raw_weather.List) ; i++ {
+    for i := 0 ; i < len(raw_weather.List) ; i++ {
         _, hour := convertTime(raw_weather.List[i].Dt)
         if dayIndex == day_no {
             var hourData WeatherData
-            hourData.Title = fmt.Sprintf("%v:00", hour)
-            hourData.Rain.Chance = toInt(raw_weather.List[i].Pop*100)
-            hourData.Rain.Amount = raw_weather.List[i].Rain.Mm + raw_weather.List[i].Snow.Mm
-            hourData.SunUp = sunUp(hour, raw_weather.City.Sunrise, raw_weather.City.Sunset)
-            populateOwmData(&hourData, &raw_weather.List[i])
+            var title string        = fmt.Sprintf("%v:00", hour)
+            var rainChance float32  = raw_weather.List[i].Pop*100
+            var rainSum float32     = raw_weather.List[i].Rain.Mm + raw_weather.List[i].Snow.Mm
+            populateOwmData(
+                &hourData, &raw_weather.List[i], title, rainChance, rainSum,
+                hour, sunrise, sunset,
+            )
             hours = append(hours, hourData)
             if hour == 0 {
                 break
@@ -225,7 +222,7 @@ func mapOmDays(raw_weather om.WeatherRange, city string, lat float32, lon float3
     var newDay bool = true
     DT_OFFSET = raw_weather.UTC_OFFSET_SECONDS       // Update tiemzone offset
     days := make([]DayWeather, 1, 24)
-    for i:=0 ; i<len(raw_weather.Hourly.Time) ; i++ {
+    for i := 0 ; i < len(raw_weather.Hourly.Time) ; i++ {
         dayName, hour := convertTime(raw_weather.Hourly.Time[i])
         // Trim away past days
         if timeInPast(raw_weather.Hourly.Time[i]) {
@@ -242,59 +239,40 @@ func mapOmDays(raw_weather om.WeatherRange, city string, lat float32, lon float3
         rainSum += raw_weather.Hourly.Precipitation[i]
         if newDay {
             // Populate data for a day fragment
-            days[day_no].DayName           = dayName
-            days[day_no].Day.Title         = dayName
-            days[day_no].Day.Rain.Chance   = maxChance
-            days[day_no].Day.Rain.Amount   = rainSum
-            days[day_no].Day.SunUp         = toBool(raw_weather.Hourly.Is_day[i])
-            populateOmData(&days[day_no].Day, &raw_weather, i)
+            days[day_no].DayName = dayName      // // // Something occationally causes an out of index error here // // //
+            populateOmData(&days[day_no].Day, &raw_weather, i, dayName, maxChance, rainSum)
             newDay = false
 
         }
-        if hour == 12 {
-            // Populate 12:00 data
-            days[day_no].DayName           = dayName
-            days[day_no].Day.Title         = dayName
-            days[day_no].Day.Rain.Chance   = maxChance
-            days[day_no].Day.Rain.Amount   = rainSum
-            days[day_no].Day.SunUp         = toBool(raw_weather.Hourly.Is_day[i])
-            populateOmData(&days[day_no].Day, &raw_weather, i)
-        } else if hour == 15 {
-            // Set final day rain
-            days[day_no].Day.Rain.Chance   = maxChance
-            days[day_no].Day.Rain.Amount   = rainSum
-            // Start counting night rain
-            maxChance = 0
-            rainSum = 0
-        } else if hour == 23 {
-            // Populate 21:00 data
-            days[day_no].DayName           = dayName
-            days[day_no].Night.Title       = dayName
-            days[day_no].Night.Rain.Chance = maxChance
-            days[day_no].Night.Rain.Amount = rainSum
-            days[day_no].Night.SunUp         = toBool(raw_weather.Hourly.Is_day[i])
-            populateOmData(&days[day_no].Night, &raw_weather, i)
-            days[day_no].Night.Rain.Chance       = maxChance
-            days[day_no].Night.Rain.Amount       = rainSum
-        } else if hour == 0 {
-            days[day_no].DayName           = dayName
-            days[day_no].Night.Title       = dayName
-            days[day_no].Night.Rain.Chance = maxChance
-            days[day_no].Night.Rain.Amount = rainSum
-            days[day_no].Night.SunUp       = toBool(raw_weather.Hourly.Is_day[i])
-            populateOmData(&days[day_no].Night, &raw_weather, i)
-            days[day_no].Night.Rain.Chance       = maxChance
-            days[day_no].Night.Rain.Amount       = rainSum
-            day_no += 1
-            newDay = true
-            if len(raw_weather.Hourly.Surface_pressure) > i+3 {
-                // If pressure shows zero, rest of the data is null
-                if raw_weather.Hourly.Surface_pressure[i+1] > 0 {
-                    days = append(days, DayWeather{})
-                } else {
-                    break
+        switch hour {
+            case 12:
+                // Populate 12:00 data
+                days[day_no].DayName = dayName
+                populateOmData(&days[day_no].Day, &raw_weather, i, dayName, maxChance, rainSum)
+            case 15:
+                // Set final day rain
+                days[day_no].Day.Rain.Chance   = maxChance
+                days[day_no].Day.Rain.Amount   = rainSum
+                // Start counting night rain
+                maxChance = 0
+                rainSum = 0
+            case 23:
+                // Populate 21:00 data
+                days[day_no].DayName = dayName
+                populateOmData(&days[day_no].Night, &raw_weather, i, dayName, maxChance, rainSum)
+            case 0:
+                days[day_no].DayName = dayName
+                populateOmData(&days[day_no].Night, &raw_weather, i, dayName, maxChance, rainSum)
+                day_no += 1
+                newDay = true
+                if len(raw_weather.Hourly.Surface_pressure) > i+3 {
+                    // If pressure shows zero, rest of the data is null
+                    if raw_weather.Hourly.Surface_pressure[i+1] > 0 {
+                        days = append(days, DayWeather{})
+                    } else {
+                        break
+                    }
                 }
-            }
         }
     }
     // Populate metadata
@@ -328,8 +306,10 @@ func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
 
         if dayIndex == day_no {
             var hourData WeatherData
-            hourData.Title = fmt.Sprintf("%v:00", hour)
-            populateOmData(&hourData, &raw_weather, i)
+            var title string    = fmt.Sprintf("%v:00", hour)
+            var maxChance int   = raw_weather.Hourly.Precipitation_probability[i]
+            var rainSum float32 = raw_weather.Hourly.Precipitation[i]
+            populateOmData(&hourData, &raw_weather, i, title, maxChance, rainSum)
             hours = append(hours, hourData)
             if hour == 0 {
                 break
@@ -370,7 +350,21 @@ func sunUp(hour uint, sunrise_dt uint, sunset_dt uint) bool {
 
 /* Copies data from from OWM InWeather to WeatherData
  */
-func populateOwmData(target *WeatherData, source *owm.Weather) {
+func populateOwmData(
+    target *WeatherData,
+    source *owm.Weather,
+    title string,
+    maxChance float32,
+    rainSum float32,
+    hour uint,
+    sunrise uint,
+    sunset uint,
+) {
+    target.Title         = title
+    target.Rain.Chance   = toInt(maxChance*100)
+    target.Rain.Amount   = rainSum
+    target.SunUp         = sunUp(hour, sunrise, sunset)
+
     target.Temp.Temp     = source.Main.Temp
     target.Pressure      = source.Main.Sea_level
     target.Humidity      = source.Main.Humidity
@@ -385,7 +379,11 @@ func populateOwmData(target *WeatherData, source *owm.Weather) {
 
 /* Copies data from from OM InWeather to WeatherData
  */
-func populateOmData(target *WeatherData, source *om.WeatherRange, index int) {
+func populateOmData(target *WeatherData, source *om.WeatherRange, index int, dayName string, maxChance int, rainSum float32) {
+    target.Title         = dayName
+    target.Rain.Chance   = maxChance
+    target.Rain.Amount   = rainSum
+    target.SunUp         = toBool(source.Hourly.Is_day[index])
     target.Temp.Temp     = source.Hourly.Temperature_2m[index]
     target.Temp.Feels    = source.Hourly.Apparent_temperature[index]
     target.Temp.Bulb     = source.Hourly.Wet_bulb_temperature_2m[index]
@@ -397,8 +395,6 @@ func populateOmData(target *WeatherData, source *om.WeatherRange, index int) {
     target.Clouds.Low    = uint(source.Hourly.Cloud_cover_low[index])
     target.Clouds.Mid    = uint(source.Hourly.Cloud_cover_mid[index])
     target.Clouds.High   = uint(source.Hourly.Cloud_cover_high[index])
-    target.Rain.Chance   = source.Hourly.Precipitation_probability[index]
-    target.Rain.Amount   = source.Hourly.Precipitation[index]
     target.Visibility    = uint(toInt(source.Hourly.Visibility[index]))
     target.SunUp         = toBool(source.Hourly.Is_day[index])
     target.Radiation.Direct  = source.Hourly.Direct_radiation[index]

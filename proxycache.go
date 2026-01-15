@@ -1,7 +1,6 @@
 package main
 
 import (
-    "errors"
     "fmt"
     "log"
     "time"
@@ -51,7 +50,7 @@ func GetOwmProxyWeather(city string) (owm.WeatherRange, error) {
     var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather owm.WeatherRange
-        err := errors.New(fmt.Sprintf("r:%4vu:%4v: City [%s] not found", rqNum, uniqRqNum, city))
+        err := fmt.Errorf("r:%4vu:%4v: City [%s] not found", rqNum, uniqRqNum, city)
         log.Println(err)
         return emptyWeather, err
     }
@@ -74,7 +73,7 @@ func GetOmProxyWeather(city string, model string) (om.WeatherRange, float32, flo
     var lat, lon float32 = GetCityCoord(city)   // Convert name to coord
     if lat==0 && lon==0 {
         var emptyWeather om.WeatherRange
-        err := errors.New(fmt.Sprintf("r:%4vu:%4v: City [%s] not found", rqNum, uniqRqNum, city))
+        err := fmt.Errorf("r:%4vu:%4v: City [%s] not found", rqNum, uniqRqNum, city)
         log.Println(err)
         return emptyWeather, 0.0, 0.0, err
     }
@@ -151,7 +150,7 @@ func addOmCacheWeather(key string, r_obj om.WeatherRange) {
 // Throws away half (every 2nd) item of a given map
 func cullMap[V Coords | owm.WeatherRange | om.WeatherRange | OmWrapper | []byte ](m *map[string]V) {
     var i int = 0
-    for key, _ := range *m {
+    for key := range *m {
         if i == 0 {
             delete(*m, key)
         }
