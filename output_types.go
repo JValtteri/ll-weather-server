@@ -239,6 +239,7 @@ func mapOmDays(raw_weather om.WeatherRange, city string, lat float32, lon float3
         if raw_weather.Hourly.Precipitation_probability[i] > maxChance {
             maxChance = raw_weather.Hourly.Precipitation_probability[i]
         }
+        rainSum += raw_weather.Hourly.Precipitation[i]
         if newDay {
             // Populate data for a day fragment
             days[day_no].DayName           = dayName
@@ -324,7 +325,7 @@ func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
                 break
             }
         }
-        
+
         if dayIndex == day_no {
             var hourData WeatherData
             hourData.Title = fmt.Sprintf("%v:00", hour)
