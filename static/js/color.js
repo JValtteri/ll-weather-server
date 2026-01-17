@@ -7,7 +7,9 @@ function colorTemp(element) {
     let value = parseInt(element.textContent.split('°')[0]);
     if (value > 23) {
         element.classList.add('hot')
-    } else if (value < -20) {
+    } else if (value <= -30) {
+        element.classList.add('vheavy')
+    } else if (value <= -20) {
         element.classList.add('arctic')
     } else if (value < 0) {
         element.classList.add('cold')
@@ -34,7 +36,11 @@ function colorRainChance(element) {
 
 function colorRain(element) {
     let value = parseFloat(element.textContent.split(' ')[0]);
-    if (value > 1) {                    // Values adjusted n/3 to fit new data source
+    if (value >= 20) {
+        element.classList.add('warn')
+    } else if (value >= 7) {
+        element.classList.add('vheavy')
+    } else if (value > 1) {
         element.classList.add('heavy')
     } else if (value > 1/3) {
         element.classList.add('medium')
@@ -45,7 +51,11 @@ function colorRain(element) {
 
 function colorWind(element) {
     let value = parseInt(element.textContent.split(' ')[0]);
-    if (value >= 10) {
+    if (value >= 20) {
+        element.classList.add('warn')
+    } else if (value >= 15) {
+        element.classList.add('vheavy')
+    } else if (value >= 10) {
         element.classList.add('heavy')
     } else if (value > 7) {
         element.classList.add('medium')
