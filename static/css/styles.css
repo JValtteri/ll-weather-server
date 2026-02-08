@@ -197,6 +197,10 @@ footer {
 }
 
 .broken-clouds {
+  background-color: #3d746b !important;
+}
+
+.overcast {
   background-color: #1b4d46 !important;
 }
 

@@ -18,9 +18,11 @@ function colorTemp(element) {
 
 function colorCloud(element) {
     let value = parseInt(element.textContent.split(' ')[0]);
-    if (value > 50) {
+    if (value > 66) {
+        element.classList.add('overcast')
+    } else if (value > 33) {
         element.classList.add('broken-clouds')
-    } else if (value > 10) {
+    } else if (value > 0) {
         element.classList.add('clear-sky')
     }
 }
