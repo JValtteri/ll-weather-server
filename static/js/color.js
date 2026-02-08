@@ -27,6 +27,30 @@ function colorCloud(element) {
     }
 }
 
+function colorPressure(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value > 1040) {
+        element.classList.add('warm')
+    } else if (value > 1022) {
+        element.classList.add('clear-sky')
+    } else if (value < 1004) {
+        element.classList.add('light')
+    } else if (value < 986) {
+        element.classList.add('vheavy')
+    }
+}
+
+function colorHumidity(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value > 90) {
+        element.classList.add('vheavy')
+    } else if (value > 70) {
+        element.classList.add('medium')
+    } else if (value < 30) {
+        element.classList.add('warm')
+    }
+}
+
 function colorRainChance(element) {
     let value = parseInt(element.textContent.split(' ')[0]);
     if (value > 70) {
@@ -102,6 +126,9 @@ export function applyColors(table) {
     applyColorRow(table, idByTitle(table, "Med"), colorCloud);
     applyColorRow(table, idByTitle(table, "High"), colorCloud);
 
+    applyColorRow(table, idByTitle(table, "Pressure"), colorPressure);
+    applyColorRow(table, idByTitle(table, "Humidity"), colorHumidity);
+
     applyColorRow(table, idByTitle(table, "Rain%"), colorRainChance);
     applyColorRow(table, idByTitle(table, "Rain"), colorRain);
     applyColorRow(table, idByTitle(table, "Wind"), colorWind);
@@ -115,5 +142,3 @@ export function colorSun(element, sunUp) {
         element.classList.remove('night');   // This should be unnecessary
     }
 }
-
-
