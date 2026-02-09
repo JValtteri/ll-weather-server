@@ -16,6 +16,32 @@ function colorTemp(element) {
     }
 }
 
+function colorUV(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value >= 8) {
+        element.classList.add('vheavy')
+    } else if (value >= 6) {
+        element.classList.add('warn')
+    } else if (value >= 5) {
+        element.classList.add('hot')
+    } else if (value >= 4) {
+        element.classList.add('warm')
+    } else if (value >= 3) {
+        element.classList.add('mild')
+    }
+}
+
+function colorRadiation(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value > 799) {
+        element.classList.add('accent-green')
+    } else if (value > 399) {
+        element.classList.add('warm')
+    } else if (value > 199) {
+        element.classList.add('mild')
+    }
+}
+
 function colorCloud(element) {
     let value = parseInt(element.textContent.split(' ')[0]);
     if (value > 66) {
@@ -32,7 +58,7 @@ function colorPressure(element) {
     if (value > 1040) {
         element.classList.add('warm')
     } else if (value > 1022) {
-        element.classList.add('clear-sky')
+        element.classList.add('mild')
     } else if (value < 1004) {
         element.classList.add('light')
     } else if (value < 986) {
@@ -120,6 +146,10 @@ export function applyColors(table) {
     applyColorRow(table, idByTitle(table, "Temp."), colorTemp);
     applyColorRow(table, idByTitle(table, "Feels"), colorTemp);
     applyColorRow(table, idByTitle(table, "Wet"), colorTemp);
+
+    applyColorRow(table, idByTitle(table, "UV"), colorUV);
+    applyColorRow(table, idByTitle(table, "Radiation"), colorRadiation);
+    applyColorRow(table, idByTitle(table, "Diffuse"), colorRadiation);
 
     applyColorRow(table, idByTitle(table, "Clouds"), colorCloud);
     applyColorRow(table, idByTitle(table, "Low"), colorCloud);
