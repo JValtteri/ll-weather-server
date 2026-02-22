@@ -98,11 +98,11 @@ function toggleX(element) {
     }
 }
 
-/* Creates a new row <tr>
+/* Creates a new row <tr> and populates it
  * Inputs:
  * days:        []obj:    'day' objects
  * table:       element:  target table element
- * elementType: str:      the type of html element to add i.e 'tr', 'td'
+ * elementType: str:      the type of html element to add inside row i.e 'th', 'td'
  * parameters:  []str:    containing the path from day object to chosen field
  * rowTitle:    str:      A title for the row (placed in first column)
  * func:        function: a function used to add content to the created cell
@@ -114,14 +114,38 @@ function populateRow(days, table, elementType, path, rowTitle, func, unit='', ma
     if (path[0] === '') {
         path.splice(0, 1);
     }
-    // Create new row
+    let rowElm = createNewRow(table, slaveTo);
+    addTitleCell(rowElm, elementType, rowTitle, masterOf);
+
+    // Data cells
+    days.forEach(day => {
+        addDataCell(rowElm, elementType, day, path, func, unit);
+    });
+}
+
+/* Creates a new row element <tr>
+ * Inputs:
+ * table:       element:  target table element
+ * slaveTo      string:   is set as hidden, and belongs to group by this name
+ */
+function createNewRow(table, slaveTo) {
     let rowElm = document.createElement('tr');
     if (slaveTo) {
         rowElm.setAttribute("hidden", '');
         rowElm.classList.add(slaveTo);
     }
     table.appendChild(rowElm);
-    // Title cells
+    return rowElm;
+}
+
+/* Creates a new tile column element <td> or <th> and populates it
+ * Inputs:
+ * rowElem:     element:  row element <tr>
+ * elementType: str:      the type of html element to add i.e 'tr', 'td'
+ * rowTitle:    str:      A title for the row (placed in first column)
+ * masterOf     string:   adds a show/hide button that controls the visibility of the group of that name
+ */
+function addTitleCell(rowElm, elementType, rowTitle, masterOf) {
     let titleElm = document.createElement(elementType);
     titleElm.classList.add('static');
     if (rowTitle === '') {
@@ -142,13 +166,21 @@ function populateRow(days, table, elementType, path, rowTitle, func, unit='', ma
         titleElm.textContent = rowTitle;
     }
     rowElm.appendChild(titleElm);
-    // Data cells
-    let columnElm;
-    days.forEach(day => {
-        columnElm = document.createElement(elementType);
-        let element = func(columnElm, day, path, unit);
-        rowElm.appendChild(element);
-    });
+}
+
+/* Creates a new cell <td> or <th>
+ * Inputs:
+ * rowElem:     element:  row element <tr>
+ * elementType: str:      the type of html element to add i.e 'td', 'th'
+ * day          obj:      'day' object
+ * path:        []str:    path to element expressed as a str list
+ * func:        function: a function used to add content to the created cell
+ * unit:        string:   unit sign of the value
+ */
+function addDataCell(rowElm, elementType, day, path, func, unit) {
+    let columnElm = document.createElement(elementType);
+    let element = func(columnElm, day, path, unit);
+    rowElm.appendChild(element);
 }
 
 /* Creates all new rows <tr>, by calling populateRow()
