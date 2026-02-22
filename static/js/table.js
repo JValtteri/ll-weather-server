@@ -123,8 +123,12 @@ function populateRow(days, table, elementType, path, rowTitle, func, unit='', ma
     table.appendChild(rowElm);
     // Title cells
     let titleElm = document.createElement(elementType);
+    titleElm.classList.add('static');
+    if (rowTitle === '') {
+        titleElm.classList.add('image-head');
+    }
     if (masterOf) {
-        titleElm.innerHTML = rowTitle + "&ensp; <b>+</b>";
+        titleElm.innerHTML = rowTitle + "  <b>+</b>"; // could use &ensp; for longer space;
         titleElm.setAttribute("id", masterOf);
         titleElm.addEventListener("click", function() {
             const subjectLines = Array.from( document.getElementsByClassName(masterOf) );
@@ -196,7 +200,7 @@ export function populateTable(days, table, path) {
     populateRow(days, table, 'td', radiation,  "Radiation",  addInt, ' W/m²', 'radiation', "temp");
     populateRow(days, table, 'td', diffuse,    "Diffuse",    addInt, ' W/m²', '', "radiation");
 
-    populateRow(days, table, 'td', clouds,     "Clouds %",   addInt, ' %', "clouds");      // Total
+    populateRow(days, table, 'td', clouds,     "Clouds",   addInt, ' %', "clouds");      // Total
     populateRow(days, table, 'td', cloudsHigh, "High %",     addInt, ' %', '', "clouds");
     populateRow(days, table, 'td', cloudsMed,  "Med %",      addInt, ' %', '', "clouds");
     populateRow(days, table, 'td', cloudsLo,   "Low %",      addInt, ' %', '', "clouds");

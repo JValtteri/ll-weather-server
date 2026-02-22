@@ -40,7 +40,8 @@ table {
 }
 
 .table-container {
-  overflow-x: scroll;
+  overflow-x: auto;
+  margin-left: 94px;
 }
 
 th, td {
@@ -63,7 +64,19 @@ tr {
 }
 
 th {
-  background-color: var(--accent-color);
+  background-color: var(--accent-color) !important;
+}
+
+.static {
+  background-color: var(--gray-main);
+  position: absolute;
+  width: 85px;
+  height: 23px;
+  left: 0;
+}
+
+.image-head {
+    height: 105px;
 }
 
 input, select {
