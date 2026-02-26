@@ -163,9 +163,6 @@ function createNewRow(table, slaveTo) {
 function addTitleCell(rowElm, elementType, rowTitle, masterOf) {
     let titleElm = document.createElement(elementType);
     titleElm.classList.add('static');
-    if (rowTitle === '') {
-        titleElm.classList.add('image-head');
-    }
     if (masterOf) {
         titleElm.innerHTML = rowTitle + "  <b>+</b>"; // could use &ensp; for longer space;
         titleElm.setAttribute("id", masterOf);

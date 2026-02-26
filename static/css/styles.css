@@ -41,7 +41,6 @@ table {
 
 .table-container {
   overflow-x: auto;
-  margin-left: 94px;
 }
 
 th, td {
@@ -69,13 +68,8 @@ th {
 
 .static {
   background-color: var(--gray-main);
-  position: absolute;
-  width: 85px;
+  position: sticky;
   left: 0;
-}
-
-.image-head {
-    height: 105px;
 }
 
 input, select {
