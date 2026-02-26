@@ -77,6 +77,17 @@ function colorHumidity(element) {
     }
 }
 
+function colorVisibility(element) {
+    let value = parseInt(element.textContent.split(' ')[0]);
+    if (value < 1) {
+        element.classList.add('warn')
+    } else if (value < 10) {
+        element.classList.add('mild')
+    } else if (value < 30) {
+        element.classList.add('clear-sky')
+    }
+}
+
 function colorRainChance(element) {
     let value = parseInt(element.textContent.split(' ')[0]);
     if (value > 70) {
@@ -158,6 +169,7 @@ export function applyColors(table) {
 
     applyColorRow(table, idByTitle(table, "Pressure"), colorPressure);
     applyColorRow(table, idByTitle(table, "Humidity"), colorHumidity);
+    applyColorRow(table, idByTitle(table, "Visibility"), colorVisibility);
 
     applyColorRow(table, idByTitle(table, "Rain%"), colorRainChance);
     applyColorRow(table, idByTitle(table, "Rain"), colorRain);

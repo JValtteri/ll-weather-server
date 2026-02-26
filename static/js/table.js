@@ -1,4 +1,4 @@
-import * as color from "./color.js?id=MTc3MDUxMTU4Nw";
+import * as color from "./color.js?id=MTc3MDUxMTU4Nwr";
 
 
 /* Function to construct a path to a specific element in JSON
@@ -52,6 +52,21 @@ function addInt(element, day, path, unit='') {
     element.textContent = `${num.toFixed(0)}${unit}`;
     return element;
 }
+
+/* Function to add int content to a cell
+ * Rounds numbers to integer/1000. Adds the optional unit parameter
+ * To be used as a parameter for populateRow()
+ */
+function addNumPerK(element, day, path, unit='') {
+    let num = constructJsonPath(day, path);
+    if (!num) {
+        num = 0;
+    }
+    const scaled = num/1000;
+    element.textContent = `${scaled.toFixed(1)}${unit}`;
+    return element;
+}
+
 
 /* Function to add number content to a cell
  * Rounds numbers to one decimal. Adds the optional unit parameter
@@ -240,7 +255,7 @@ export function populateTable(days, table, path) {
     populateRow(days, table, 'td', pressure,   "Pressure",    addInt, ' hPa', '', "clouds");
     populateRow(days, table, 'td', humidity,   "Humidity",    addInt, ' %', '', "clouds");
 
-    populateRow(days, table, 'td', visibility, "Visibility", addInt, " m", '', "clouds");
+    populateRow(days, table, 'td', visibility, "Visibility", addNumPerK, " km", '', "clouds");
 
     populateRow(days, table, 'td', chance,     "Rain%",      addFloat, ' %');                // Chance
     populateRow(days, table, 'td', amount,     "Rain [mm]",  addFloat, ' mm');       // Total
