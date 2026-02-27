@@ -79,7 +79,9 @@ function colorHumidity(element) {
 
 function colorVisibility(element) {
     let value = parseInt(element.textContent.split(' ')[0]);
-    if (value < 1) {
+    if (value == 0) {
+        // Don't add color. The data is missing
+    } else if (value < 1) {
         element.classList.add('warn')
     } else if (value < 10) {
         element.classList.add('mild')

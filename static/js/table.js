@@ -1,4 +1,4 @@
-import * as color from "./color.js?id=MTc3MDUxMTU4Nwr";
+import * as color from "./color.js?id=MTc3MDUxMTU4Nwt";
 
 
 /* Function to construct a path to a specific element in JSON
