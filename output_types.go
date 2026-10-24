@@ -44,6 +44,13 @@ type DayHours struct {
     }
 }
 
+type OverviewVals struct {
+    Min   float32
+    Max   float32
+    Avg   float32
+    Count int
+}
+
 type WeatherData struct {
     Title       string   // Day or Time
     Temp        struct {
@@ -78,6 +85,25 @@ type WeatherData struct {
     Uv         float32
     IconID     string
     SunUp      bool
+    Overview    *struct {
+        Temp     OverviewVals
+        Feels    OverviewVals
+        Bulb     OverviewVals
+        Uv       OverviewVals
+        Direct   OverviewVals
+        Diffuse  OverviewVals
+        Clouds   OverviewVals
+        CloudsLo OverviewVals
+        CloudsMed OverviewVals
+        CloudsHigh OverviewVals
+        Pressure OverviewVals
+        Humidity OverviewVals
+        Visibility OverviewVals
+        RainChance OverviewVals
+        RainAmount OverviewVals
+        WindSpeed OverviewVals
+        WindGust OverviewVals
+    }
 }
 
 const REFERENCE_TIME uint = 1740096000  // UTC (+0:00)
@@ -282,6 +308,192 @@ func mapOmDays(raw_weather om.WeatherRange, city string, lat float32, lon float3
     return week
 }
 
+func aggregateOmAtIndex(r_objs []om.WeatherRange, index int, dayName string) WeatherData {
+    var wd WeatherData
+    wd.Title = dayName
+    ov := &struct {
+        Temp     OverviewVals
+        Feels    OverviewVals
+        Bulb     OverviewVals
+        Uv       OverviewVals
+        Direct   OverviewVals
+        Diffuse  OverviewVals
+        Clouds   OverviewVals
+        CloudsLo OverviewVals
+        CloudsMed OverviewVals
+        CloudsHigh OverviewVals
+        Pressure OverviewVals
+        Humidity OverviewVals
+        Visibility OverviewVals
+        RainChance OverviewVals
+        RainAmount OverviewVals
+        WindSpeed OverviewVals
+        WindGust OverviewVals
+    }{
+        Temp: initOverviewVals(), Feels: initOverviewVals(), Bulb: initOverviewVals(), Uv: initOverviewVals(),
+        Direct: initOverviewVals(), Diffuse: initOverviewVals(), Clouds: initOverviewVals(), CloudsLo: initOverviewVals(),
+        CloudsMed: initOverviewVals(), CloudsHigh: initOverviewVals(), Pressure: initOverviewVals(), Humidity: initOverviewVals(),
+        Visibility: initOverviewVals(), RainChance: initOverviewVals(), RainAmount: initOverviewVals(), WindSpeed: initOverviewVals(), WindGust: initOverviewVals(),
+    }
+    // collect
+    var temps []float32
+    for _, r := range r_objs {
+        if index >= len(r.Hourly.Time) {
+            continue
+        }
+        // pick values
+        addVal(&ov.Temp, r.Hourly.Temperature_2m[index])
+        addVal(&ov.Feels, r.Hourly.Apparent_temperature[index])
+        addVal(&ov.Bulb, r.Hourly.Wet_bulb_temperature_2m[index])
+        addVal(&ov.Uv, r.Hourly.Uv_index[index])
+        addVal(&ov.Direct, r.Hourly.Direct_radiation[index])
+        addVal(&ov.Diffuse, r.Hourly.Diffuse_radiation[index])
+        addVal(&ov.Clouds, float32(r.Hourly.Cloud_cover[index]))
+        addVal(&ov.CloudsLo, float32(r.Hourly.Cloud_cover_low[index]))
+        addVal(&ov.CloudsMed, float32(r.Hourly.Cloud_cover_mid[index]))
+        addVal(&ov.CloudsHigh, float32(r.Hourly.Cloud_cover_high[index]))
+        addVal(&ov.Pressure, r.Hourly.Pressure_msl[index])
+        addVal(&ov.Humidity, float32(r.Hourly.Relative_humidity_2m[index]))
+        addVal(&ov.Visibility, r.Hourly.Visibility[index])
+        addVal(&ov.RainChance, float32(r.Hourly.Precipitation_probability[index]))
+        addVal(&ov.RainAmount, r.Hourly.Precipitation[index])
+        addVal(&ov.WindSpeed, r.Hourly.Wind_speed_10m[index])
+        addVal(&ov.WindGust, r.Hourly.Wind_gusts_10m[index])
+        temps = append(temps, r.Hourly.Temperature_2m[index])
+    }
+    finalizeOverviewVals(&ov.Temp)
+    finalizeOverviewVals(&ov.Feels)
+    finalizeOverviewVals(&ov.Bulb)
+    finalizeOverviewVals(&ov.Uv)
+    finalizeOverviewVals(&ov.Direct)
+    finalizeOverviewVals(&ov.Diffuse)
+    finalizeOverviewVals(&ov.Clouds)
+    finalizeOverviewVals(&ov.CloudsLo)
+    finalizeOverviewVals(&ov.CloudsMed)
+    finalizeOverviewVals(&ov.CloudsHigh)
+    finalizeOverviewVals(&ov.Pressure)
+    finalizeOverviewVals(&ov.Humidity)
+    finalizeOverviewVals(&ov.Visibility)
+    finalizeOverviewVals(&ov.RainChance)
+    finalizeOverviewVals(&ov.RainAmount)
+    finalizeOverviewVals(&ov.WindSpeed)
+    finalizeOverviewVals(&ov.WindGust)
+    // Set display values to something reasonable (e.g., average for non-minmax display? but frontend will read min/max from overview)
+    wd.Temp.Temp = ov.Temp.Avg
+    wd.Temp.Feels = ov.Feels.Avg
+    wd.Temp.Bulb = ov.Bulb.Avg
+    wd.Uv = ov.Uv.Avg
+    wd.Radiation.Direct = ov.Direct.Avg
+    wd.Radiation.Diffuse = ov.Diffuse.Avg
+    wd.Clouds.Clouds = uint(ov.Clouds.Avg + 0.5)
+    wd.Clouds.Low = uint(ov.CloudsLo.Avg + 0.5)
+    wd.Clouds.Mid = uint(ov.CloudsMed.Avg + 0.5)
+    wd.Clouds.High = uint(ov.CloudsHigh.Avg + 0.5)
+    wd.Pressure = toInt(ov.Pressure.Avg)
+    wd.Humidity = ov.Humidity.Avg
+    wd.Visibility = uint(toInt(ov.Visibility.Avg))
+    wd.Rain.Chance = toInt(ov.RainChance.Avg)
+    wd.Rain.Amount = ov.RainAmount.Avg
+    wd.Wind.Speed = ov.WindSpeed.Avg
+    wd.Wind.Gust = ov.WindGust.Avg
+    // pick icon/wind dir/sunup from first available
+    if len(r_objs) > 0 && index < len(r_objs[0].Hourly.Time) {
+        wd.Wind.Deg = r_objs[0].Hourly.Wind_direction_10m[index]
+        wd.Wind.Dir = windToStr(wd.Wind.Deg)
+        wd.SunUp = toBool(r_objs[0].Hourly.Is_day[index])
+        wd.IconID = wmoToOwm(r_objs[0].Hourly.Weather_code[index], wd.SunUp)
+    }
+    wd.Overview = ov
+    return wd
+}
+
+func mapOmDaysOverview(r_objs []om.WeatherRange, city string, lat float32, lon float32) WeekWeather {
+    if len(r_objs) == 0 {
+        return WeekWeather{}
+    }
+    ref := r_objs[0]
+    DT_OFFSET = ref.UTC_OFFSET_SECONDS
+    var week WeekWeather
+    days := make([]DayWeather, 1, 24)
+    var day_no int = 0
+    var newDay bool = true
+    // Accumulators for rain over day period (06-15?) similar to normal
+    var rainSum []float32
+    var maxChance []int
+    for _ = range r_objs {
+        rainSum = append(rainSum, 0)
+        maxChance = append(maxChance, 0)
+    }
+    for i := 0; i < len(ref.Hourly.Time); i++ {
+        dayName, hour := convertTime(ref.Hourly.Time[i])
+        if timeInPast(ref.Hourly.Time[i]) {
+            continue
+        }
+        if hour == 6 {
+            for j := range r_objs {
+                maxChance[j] = 0
+                rainSum[j] = 0
+            }
+        }
+        for j := range r_objs {
+            if i < len(r_objs[j].Hourly.Time) {
+                if r_objs[j].Hourly.Precipitation_probability[i] > maxChance[j] {
+                    maxChance[j] = r_objs[j].Hourly.Precipitation_probability[i]
+                }
+                rainSum[j] += r_objs[j].Hourly.Precipitation[i]
+            }
+        }
+        if newDay {
+            days[day_no].DayName = dayName
+            days[day_no].Day = aggregateOmAtIndex(r_objs, i, dayName)
+            newDay = false
+        }
+        if hour == 12 {
+            days[day_no].DayName = dayName
+            days[day_no].Day = aggregateOmAtIndex(r_objs, i, dayName)
+        } else if hour == 15 {
+            // aggregate rain over models
+            var ro OverviewVals = initOverviewVals()
+            var rsum OverviewVals = initOverviewVals()
+            for j := range r_objs {
+                addVal(&ro, float32(maxChance[j]))
+                addVal(&rsum, rainSum[j])
+            }
+            finalizeOverviewVals(&ro)
+            finalizeOverviewVals(&rsum)
+            days[day_no].Day.Rain.Chance = toInt(ro.Avg)
+            days[day_no].Day.Rain.Amount = rsum.Avg
+            if days[day_no].Day.Overview != nil {
+                days[day_no].Day.Overview.RainChance = ro
+                days[day_no].Day.Overview.RainAmount = rsum
+            }
+            for j := range r_objs {
+                maxChance[j] = 0
+                rainSum[j] = 0
+            }
+        } else if hour == 23 {
+            days[day_no].DayName = dayName
+            days[day_no].Night = aggregateOmAtIndex(r_objs, i, dayName)
+        } else if hour == 0 {
+            days[day_no].DayName = dayName
+            days[day_no].Night = aggregateOmAtIndex(r_objs, i, dayName)
+            if len(ref.Hourly.Surface_pressure) > i+3 && ref.Hourly.Surface_pressure[i+1] > 0 {
+                days = append(days, DayWeather{})
+            } else {
+                break
+            }
+            day_no += 1
+            newDay = true
+        }
+    }
+    week.Timestamp = uint(time.Now().Unix())
+    week.Days = days
+    week.City = city
+    week.Coord.Lat = lat
+    week.Coord.Lon = lon
+    return week
+}
+
 /* Maps raw_weather data from OM in to a DayHours struct
  */
 func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
@@ -321,6 +533,48 @@ func mapOmHours(raw_weather om.WeatherRange, dayIndex int) DayHours {
     day.Coord.Lat = raw_weather.Latitude
     day.Coord.Lon = raw_weather.Longtitude
     //day.City = raw_weather.City.Name
+    day.Timestamp = uint(time.Now().Unix())
+    return day
+}
+
+func aggregateOmAtIndexHour(r_objs []om.WeatherRange, index int, title string) WeatherData {
+    return aggregateOmAtIndex(r_objs, index, title)
+}
+
+func mapOmHoursOverview(r_objs []om.WeatherRange, dayIndex int) DayHours {
+    if len(r_objs) == 0 {
+        return DayHours{}
+    }
+    ref := r_objs[0]
+    var day_no int = 0
+    hours := make([]WeatherData, 0, 24)
+    for i := 0; i < len(ref.Hourly.Time); i++ {
+        _, hour := convertTime(ref.Hourly.Time[i])
+        if timeInPast(ref.Hourly.Time[i]) {
+            continue
+        }
+        if len(ref.Hourly.Surface_pressure) > i+3 {
+            if ref.Hourly.Surface_pressure[i+1] == 0 {
+                break
+            }
+        }
+        if dayIndex == day_no {
+            var hourData WeatherData
+            var title string = fmt.Sprintf("%v:00", hour)
+            hourData = aggregateOmAtIndex(r_objs, i, title)
+            hours = append(hours, hourData)
+            if hour == 0 {
+                break
+            }
+        }
+        if hour == 0 {
+            day_no += 1
+        }
+    }
+    var day DayHours
+    day.Hours = hours
+    day.Coord.Lat = ref.Latitude
+    day.Coord.Lon = ref.Longtitude
     day.Timestamp = uint(time.Now().Unix())
     return day
 }
@@ -443,6 +697,32 @@ func toBool(n int) bool {
         return true
     } else {
         return false
+    }
+}
+
+func initOverviewVals() OverviewVals {
+    return OverviewVals{Min: 1e12, Max: -1e12, Avg: 0, Count: 0}
+}
+
+func addVal(o *OverviewVals, v float32) {
+    if o.Count == 0 {
+        o.Min = v
+        o.Max = v
+    } else {
+        if v < o.Min {
+            o.Min = v
+        }
+        if v > o.Max {
+            o.Max = v
+        }
+    }
+    o.Avg += v
+    o.Count++
+}
+
+func finalizeOverviewVals(o *OverviewVals) {
+    if o.Count > 0 {
+        o.Avg = o.Avg / float32(o.Count)
     }
 }
 
