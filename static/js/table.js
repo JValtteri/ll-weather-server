@@ -7,15 +7,53 @@ import * as color from "./color.js?id=MTc3MDUxMTU4Nwk";
  */
 function constructJsonPath(dataTarget, path) {
     for (let i = 0; i < path.length; ++i) {
+        if (dataTarget === undefined || dataTarget === null) {
+            return undefined;
+        }
         dataTarget = dataTarget[path[i]];
     }
     return dataTarget;
+}
+
+/* Returns the data object that holds the Overview values, and the path
+ * relative to that object.
+ * Day forecasts store the data separately for 'Day' and 'Night', while hour
+ * forecasts store it directly on the 'day' object.
+ */
+function getOverviewData(day, path) {
+    if (!day) return null;
+    let data = day;
+    let subPath = Array.isArray(path) ? path.slice() : [];
+    if (subPath.length > 0 && (subPath[0] === 'Day' || subPath[0] === 'Night')) {
+        const timeframe = day[subPath[0]];
+        if (timeframe && typeof timeframe === 'object') {
+            data = timeframe;
+            subPath = subPath.slice(1);
+        }
+    }
+    if (!data || !data.Overview) return null;
+    return { overview: data.Overview, path: subPath };
+}
+
+function isOverview(day, path) {
+    return getOverviewData(day, path) !== null;
+}
+
+function setTooltip(element, text) {
+    if (text !== undefined && text !== null && text !== '') {
+        element.title = text;
+    }
 }
 
 /* Function to add text content to a cell
  * To be used as a parameter for populateRow()
  */
 function addText(element, day, path, unit='') {
+    if (isOverview(day, path)) {
+        let text = constructJsonPath(day, path);
+        element.textContent = `${text ?? ''}${unit}`;
+        return element;
+    }
     let text = constructJsonPath(day, path);
     element.textContent = `${text}${unit}`;
     return element;
@@ -35,7 +73,9 @@ function addSun(element, day, path, _='') {
         sun = day;
     }
     element.textContent = text;
-    color.colorSun(element, sun.SunUp);
+    if (sun) {
+        color.colorSun(element, sun.SunUp);
+    }
     return element;
 }
 
@@ -45,11 +85,86 @@ function addSun(element, day, path, _='') {
  * To be used as a parameter for populateRow()
  */
 function addInt(element, day, path, unit='') {
+    if (isOverview(day, path)) {
+        return addIntOverview(element, day, path, unit);
+    }
     let num = constructJsonPath(day, path);
-    if (!num) {
+    if (num === undefined || num === null) {
         num = 0;
     }
     element.textContent = `${num.toFixed(0)}${unit}`;
+    return element;
+}
+
+function getOverviewForPath(day, path) {
+    const context = getOverviewData(day, path);
+    if (!context) return null;
+    const ov = context.overview;
+    const p = context.path;
+    if (p[0] === 'Temp') {
+        if (p[1] === 'Temp') return ov.Temp;
+        if (p[1] === 'Feels') return ov.Feels;
+        if (p[1] === 'Bulb') return ov.Bulb;
+    }
+    if (p[0] === 'Uv') return ov.Uv;
+    if (p[0] === 'Radiation') {
+        if (p[1] === 'Direct') return ov.Direct;
+        if (p[1] === 'Diffuse') return ov.Diffuse;
+    }
+    if (p[0] === 'Clouds') {
+        if (p[1] === 'Clouds') return ov.Clouds;
+        if (p[1] === 'Low') return ov.CloudsLo;
+        if (p[1] === 'Mid') return ov.CloudsMed;
+        if (p[1] === 'High') return ov.CloudsHigh;
+    }
+    if (p[0] === 'Pressure') return ov.Pressure;
+    if (p[0] === 'Humidity') return ov.Humidity;
+    if (p[0] === 'Visibility') return ov.Visibility;
+    if (p[0] === 'Rain') {
+        if (p[1] === 'Chance') return ov.RainChance;
+        if (p[1] === 'Amount') return ov.RainAmount;
+    }
+    if (p[0] === 'Wind') {
+        if (p[1] === 'Speed') return ov.WindSpeed;
+        if (p[1] === 'Gust') return ov.WindGust;
+    }
+    return null;
+}
+
+/* Returns the path relative to the object that holds the Overview values.
+ * Used for coloring the gradient, which expects paths without the Day/Night
+ * prefix.
+ */
+function getOverviewPath(day, path) {
+    const context = getOverviewData(day, path);
+    return context ? context.path : path;
+}
+
+/* Formats a min-max range. If both ends would display as the same number,
+ * only that single value is shown.
+ */
+function formatOverviewRange(minDisp, maxDisp, unit='') {
+    const suffix = unit ? ` ${unit.trim()}` : '';
+    if (minDisp === maxDisp) {
+        return `${minDisp}${suffix}`;
+    }
+    return `${minDisp} - ${maxDisp}${suffix}`;
+}
+
+function addIntOverview(element, day, path, unit='') {
+    const ov = getOverviewForPath(day, path);
+    if (!ov) {
+        let num = constructJsonPath(day, path);
+        if (num === undefined || num === null) num = 0;
+        element.textContent = `${num.toFixed(0)}${unit}`;
+        return element;
+    }
+    const minv = ov.Min, maxv = ov.Max, avg = ov.Avg;
+    let minDisp = Math.round(minv);
+    let maxDisp = Math.round(maxv);
+    element.textContent = formatOverviewRange(minDisp, maxDisp, unit);
+    setTooltip(element, `Average: ${avg.toFixed(1)}${unit ? unit.trim() : ''}`);
+    color.applyOverviewGradient(element, {min: minv, max: maxv, avg: avg}, getOverviewPath(day, path), unit);
     return element;
 }
 
@@ -58,8 +173,18 @@ function addInt(element, day, path, unit='') {
  * To be used as a parameter for populateRow()
  */
 function addNumPerK(element, day, path, unit='') {
+    if (isOverview(day, path)) {
+        const ov = getOverviewForPath(day, path);
+        if (ov) {
+            const minv = ov.Min/1000, maxv = ov.Max/1000, avg = ov.Avg/1000;
+            element.textContent = formatOverviewRange(minv.toFixed(1), maxv.toFixed(1), unit);
+            setTooltip(element, `Average: ${avg.toFixed(1)}${unit ? unit.trim() : ''}`);
+            color.applyOverviewGradient(element, {min: ov.Min, max: ov.Max, avg: ov.Avg}, getOverviewPath(day, path), unit);
+            return element;
+        }
+    }
     let num = constructJsonPath(day, path);
-    if (!num) {
+    if (num === undefined || num === null) {
         num = 0;
     }
     const scaled = num/1000;
@@ -73,8 +198,17 @@ function addNumPerK(element, day, path, unit='') {
  * To be used as a parameter for populateRow()
  */
 function addFloat(element, day, path, unit='') {
+    if (isOverview(day, path)) {
+        const ov = getOverviewForPath(day, path);
+        if (ov) {
+            element.textContent = formatOverviewRange(ov.Min.toFixed(1), ov.Max.toFixed(1), unit);
+            setTooltip(element, `Average: ${ov.Avg.toFixed(1)}${unit ? unit.trim() : ''}`);
+            color.applyOverviewGradient(element, {min: ov.Min, max: ov.Max, avg: ov.Avg}, getOverviewPath(day, path), unit);
+            return element;
+        }
+    }
     let num = constructJsonPath(day, path);
-    if (!num) {
+    if (num === undefined || num === null) {
         num = 0;
     }
     element.textContent = `${num.toFixed(1)}${unit}`;

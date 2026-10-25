@@ -248,3 +248,20 @@ footer {
 .accent-green {
   background-color: var(--accent-color);
 }
+
+.overview-cell {
+  background-image: linear-gradient(90deg, #5272ad, #34548f, #20407b);
+}
+
+#days-forecast td.overview-cell,
+#hours-forecast td.overview-cell {
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+}
+
+#days-forecast td.overview-cell,
+#hours-forecast td.overview-cell,
+.overview-cell {
+  background-clip: padding-box !important;
+  -webkit-background-clip: padding-box !important;
+}
