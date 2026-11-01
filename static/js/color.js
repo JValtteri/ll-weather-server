@@ -218,7 +218,10 @@ export function applyColors(table) {
             const value = rule.parse(element);
             if (isNaN(value)) return;
             const cls = getColorClassForValue(value, rule.path);
-            if (cls) element.classList.add(cls);
+            if (cls) {
+                element.classList.add(cls);
+                element.style.backgroundColor = classToColor(cls);
+            }
         };
         for (const title of rule.titles) {
             try {
@@ -231,7 +234,9 @@ export function applyColors(table) {
 export function colorSun(element, sunUp) {
     if (!sunUp) {
         element.classList.add('night');
+        element.style.backgroundColor = classToColor('night');
     } else {
-        element.classList.remove('night');   // This should be unnecessary
+        element.classList.remove('night');
+        element.style.backgroundColor = '';
     }
 }
