@@ -1,4 +1,3 @@
-
 /*
  * Color highlights
  */
@@ -8,154 +7,6 @@ function clearColorClasses(element) {
     classes.forEach(c => element.classList.remove(c));
     element.style.backgroundColor = '';
     element.style.backgroundImage = '';
-}
-
-function colorTemp(element) {
-    clearColorClasses(element);
-    let value = parseInt(element.textContent.split('°')[0]);
-    if (isNaN(value)) return;
-    if (value > 23) {
-        element.classList.add('hot')
-    } else if (value >= 20) {
-        element.classList.add('warm')
-    } else if (value <= -30) {
-        element.classList.add('vheavy')
-    } else if (value <= -20) {
-        element.classList.add('arctic')
-    } else if (value < 0) {
-        element.classList.add('cold')
-    }
-}
-
-function colorUV(element) {
-    clearColorClasses(element);
-    let value = parseInt(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value >= 8) {
-        element.classList.add('vheavy')
-    } else if (value >= 6) {
-        element.classList.add('warn')
-    } else if (value >= 5) {
-        element.classList.add('hot')
-    } else if (value >= 4) {
-        element.classList.add('warm')
-    } else if (value >= 3) {
-        element.classList.add('mild')
-    }
-}
-
-function colorRadiation(element) {
-    clearColorClasses(element);
-    let value = parseInt(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value > 799) {
-        element.classList.add('accent-green')
-    } else if (value > 399) {
-        element.classList.add('warm')
-    } else if (value > 199) {
-        element.classList.add('mild')
-    }
-}
-
-function colorCloud(element) {
-    clearColorClasses(element);
-    let value = parseInt(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value > 66) {
-        element.classList.add('overcast')
-    } else if (value > 33) {
-        element.classList.add('broken-clouds')
-    } else if (value > 0) {
-        element.classList.add('clear-sky')
-    }
-}
-
-function colorPressure(element) {
-    clearColorClasses(element);
-    let value = parseInt(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value > 1040) {
-        element.classList.add('warm')
-    } else if (value > 1022) {
-        element.classList.add('mild')
-    } else if (value < 986) {
-        element.classList.add('vheavy')
-    } else if (value < 1004) {
-        element.classList.add('light')
-    }
-}
-
-function colorHumidity(element) {
-    clearColorClasses(element);
-    let value = parseInt(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value > 90) {
-        element.classList.add('vheavy')
-    } else if (value > 70) {
-        element.classList.add('medium')
-    } else if (value < 30) {
-        element.classList.add('warm')
-    }
-}
-
-function colorVisibility(element) {
-    clearColorClasses(element);
-    let value = parseFloat(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value === 0) {
-        // Don't add color. The data is missing
-    } else if (value < 1) {
-        element.classList.add('warn')
-    } else if (value < 10) {
-        element.classList.add('mild')
-    } else if (value < 30) {
-        element.classList.add('clear-sky')
-    }
-}
-
-function colorRainChance(element) {
-    clearColorClasses(element);
-    let value = parseInt(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value > 70) {
-        element.classList.add('medium')
-    } else if (value > 19) {
-        element.classList.add('light')
-    }
-}
-
-function colorRain(element) {
-    clearColorClasses(element);
-    let value = parseFloat(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value >= 20) {
-        element.classList.add('warn')
-    } else if (value >= 7) {
-        element.classList.add('vheavy')
-    } else if (value > 1) {
-        element.classList.add('heavy')
-    } else if (value > 1/3) {
-        element.classList.add('medium')
-    } else if (value > 0.0) {
-        element.classList.add('light')
-    }
-}
-
-function colorWind(element) {
-    clearColorClasses(element);
-    let value = parseInt(element.textContent.split(' ')[0]);
-    if (isNaN(value)) return;
-    if (value >= 20) {
-        element.classList.add('warn')
-    } else if (value >= 15) {
-        element.classList.add('vheavy')
-    } else if (value >= 10) {
-        element.classList.add('heavy')
-    } else if (value > 7) {
-        element.classList.add('medium')
-    } else if (value >= 4) {
-        element.classList.add('light')
-    }
 }
 
 function hexToRgb(hex) {
@@ -171,6 +22,8 @@ function lerpColor(a,b,t) {
     return rgbToHex(c1[0] + (c2[0]-c1[0])*t, c1[1] + (c2[1]-c1[1])*t, c1[2] + (c2[2]-c1[2])*t);
 }
 
+// Single source of truth for the color thresholds. The result is a CSS
+// class name (or null when no rule matches).
 function getColorClassForValue(value, path) {
     if ((path && path[1] === 'Temp') || (path && path[0] === 'Temp')) {
         if (value > 23) return 'hot';
@@ -340,65 +193,39 @@ function idByTitle(table, name) {
     console.error(`Name: "${name}" not found in table`);
 }
 
+// Describes how each table row should be colored. The thresholds themselves
+// live only in getColorClassForValue above.
+const ROW_COLOR_RULES = [
+    { titles: ['Temp.', 'Feels', 'Wet'], path: ['Temp'], parse: el => parseInt(el.textContent.split('°')[0]) },
+    { titles: ['UV'], path: ['Uv'], parse: el => parseInt(el.textContent.split(' ')[0]) },
+    { titles: ['Radiation', 'Diffuse'], path: ['Radiation'], parse: el => parseInt(el.textContent.split(' ')[0]) },
+    { titles: ['Clouds', 'Low', 'Med', 'High'], path: ['Clouds'], parse: el => parseInt(el.textContent.split(' ')[0]) },
+    { titles: ['Pressure'], path: ['Pressure'], parse: el => parseInt(el.textContent.split(' ')[0]) },
+    { titles: ['Humidity'], path: ['Humidity'], parse: el => parseInt(el.textContent.split(' ')[0]) },
+    { titles: ['Visibility'], path: ['Visibility'], parse: el => parseFloat(el.textContent.split(' ')[0]) },
+    { titles: ['Rain%'], path: ['Rain', 'Chance'], parse: el => parseInt(el.textContent.split(' ')[0]) },
+    { titles: ['Rain'], path: ['Rain'], parse: el => parseFloat(el.textContent.split(' ')[0]) },
+    { titles: ['Wind', 'Gust'], path: ['Wind'], parse: el => parseInt(el.textContent.split(' ')[0]) },
+];
+
 /*
  * Applies highlight colors to an entire table
  */
 export function applyColors(table) {
-    try {
-        applyColorRow(table, idByTitle(table, "Temp."), colorTemp);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Feels"), colorTemp);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Wet"), colorTemp);
-    } catch(e) {}
-
-    try {
-        applyColorRow(table, idByTitle(table, "UV"), colorUV);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Radiation"), colorRadiation);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Diffuse"), colorRadiation);
-    } catch(e) {}
-
-    try {
-        applyColorRow(table, idByTitle(table, "Clouds"), colorCloud);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Low"), colorCloud);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Med"), colorCloud);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "High"), colorCloud);
-    } catch(e) {}
-
-    try {
-        applyColorRow(table, idByTitle(table, "Pressure"), colorPressure);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Humidity"), colorHumidity);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Visibility"), colorVisibility);
-    } catch(e) {}
-
-    try {
-        applyColorRow(table, idByTitle(table, "Rain%"), colorRainChance);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Rain"), colorRain);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Wind"), colorWind);
-    } catch(e) {}
-    try {
-        applyColorRow(table, idByTitle(table, "Gust"), colorWind);
-    } catch(e) {}
+    for (const rule of ROW_COLOR_RULES) {
+        const colorer = (element) => {
+            clearColorClasses(element);
+            const value = rule.parse(element);
+            if (isNaN(value)) return;
+            const cls = getColorClassForValue(value, rule.path);
+            if (cls) element.classList.add(cls);
+        };
+        for (const title of rule.titles) {
+            try {
+                applyColorRow(table, idByTitle(table, title), colorer);
+            } catch (e) {}
+        }
+    }
 }
 
 export function colorSun(element, sunUp) {
