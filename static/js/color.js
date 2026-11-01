@@ -220,7 +220,7 @@ export function applyColors(table) {
             const cls = getColorClassForValue(value, rule.path);
             if (cls) {
                 element.classList.add(cls);
-                element.style.backgroundColor = classToColor(cls);
+                element.style.setProperty('background-color', classToColor(cls), 'important');
             }
         };
         for (const title of rule.titles) {
@@ -234,9 +234,9 @@ export function applyColors(table) {
 export function colorSun(element, sunUp) {
     if (!sunUp) {
         element.classList.add('night');
-        element.style.backgroundColor = classToColor('night');
+        element.style.setProperty('background-color', classToColor('night'), 'important');
     } else {
         element.classList.remove('night');
-        element.style.backgroundColor = '';
+        element.style.removeProperty('background-color');
     }
 }
