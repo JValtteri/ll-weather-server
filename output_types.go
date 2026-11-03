@@ -623,9 +623,9 @@ func windToStr(wind int) string {
     case 6:
         return "W"
     case 7:
-        return "W"
-    case 8:
         return "NW"
+    case 8:
+        return "N"
     default:
         return "N"
     }
