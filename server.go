@@ -144,14 +144,14 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
  */
 func getOverviewWeather(city string) ([]om.WeatherRange, float32, float32, error) {
     var ranges []om.WeatherRange
+    var r_obj om.WeatherRange
     var lat, lon float32
+    var err error
     for _, model := range overviewModels {
-        r_obj, modelLat, modelLon, err := GetOmProxyWeather(city, model)
+        r_obj, lat, lon, err = GetOmProxyWeather(city, model)
         if err != nil {
             continue
         }
-        lat = modelLat
-        lon = modelLon
         ranges = append(ranges, r_obj)
     }
     if len(ranges) == 0 {
