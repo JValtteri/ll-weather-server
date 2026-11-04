@@ -71,15 +71,23 @@ func cityOverviewRequest(w http.ResponseWriter, request *http.Request) {
         var r_obj owm.WeatherRange
         r_obj, err = GetOwmProxyWeather(city)
         f_obj = mapOwmDays(r_obj)
+    } else if model == "overview" {
+        var r_objs []om.WeatherRange
+        var lat, lon float32
+        r_objs, lat, lon, err = getOverviewWeather(city)
+        if err == nil {
+            f_obj = mapOmDays(overviewSource(r_objs), strings.Title(city), lat, lon)
+        }
     } else {
         var lat, lon float32
         var r_obj om.WeatherRange
         r_obj, lat, lon, err = GetOmProxyWeather(city, model)
-        f_obj = mapOmDays(r_obj, strings.Title(city), lat, lon)
+        f_obj = mapOmDays(singleModelSource(r_obj), strings.Title(city), lat, lon)
     }
     setCorrs(w)
     if err != nil {
         http.NotFound(w, request)
+        return
     }
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprintf(w, unloadJSON(f_obj))
@@ -105,22 +113,51 @@ func cityDetailRequest(w http.ResponseWriter, request *http.Request) {
     dayNumber, err := strconv.Atoi(dayNo)
     if err != nil {
         http.Error(w, "400 Bad Request", http.StatusBadRequest)
+        return
     }
     if legacy == "true" {
         var r_obj owm.WeatherRange
         r_obj, err = GetOwmProxyWeather(city)
         f_obj = mapOwmHours(r_obj, dayNumber)
+    } else if model == "overview" {
+        var r_objs []om.WeatherRange
+        r_objs, _, _, err = getOverviewWeather(city)
+        if err == nil {
+            f_obj = mapOmHours(overviewSource(r_objs), dayNumber)
+        }
     } else {
         var r_obj om.WeatherRange
         r_obj, _, _, err = GetOmProxyWeather(city, model)
-        f_obj = mapOmHours(r_obj, dayNumber)
+        f_obj = mapOmHours(singleModelSource(r_obj), dayNumber)
     }
     setCorrs(w)
     if err != nil {
         http.NotFound(w, request)
+        return
     }
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprintf(w, unloadJSON(f_obj))
+}
+
+/* Fetches the models used by the overview forecast. Returns an error only
+ * when none of the models could be fetched.
+ */
+func getOverviewWeather(city string) ([]om.WeatherRange, float32, float32, error) {
+    var ranges []om.WeatherRange
+    var r_obj om.WeatherRange
+    var lat, lon float32
+    var err error
+    for _, model := range overviewModels {
+        r_obj, lat, lon, err = GetOmProxyWeather(city, model)
+        if err != nil {
+            continue
+        }
+        ranges = append(ranges, r_obj)
+    }
+    if len(ranges) == 0 {
+        return nil, 0, 0, fmt.Errorf("no overview data")
+    }
+    return ranges, lat, lon, nil
 }
 
 func getCookie(request *http.Request, cookieName string) string {
@@ -169,9 +206,16 @@ func whitelist(input string, list []string) bool {
     return false
 }
 
+var overviewModels = []string{
+    "gem_global",
+    "ecmwf_ifs025",
+    "ukmo_global_deterministic_10km",
+}
+
 var modelList = []string{
     "",
     "best_match",
+    "overview",
     "icon_eu",
     "gem_global",
     "gfs_graphcast025",

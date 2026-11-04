@@ -189,62 +189,19 @@ footer {
   to {rotate: 360deg;}
 }
 
-.light {
-  background-color: #5272ad !important;
+.overview-cell {
+  background-image: linear-gradient(90deg, #5272ad, #34548f, #20407b);
 }
 
-.medium {
-  background-color: #34548f !important;
+#days-forecast td.overview-cell,
+#hours-forecast td.overview-cell {
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
 }
 
-.heavy {
-  background-color: #20407b !important;
-}
-
-.warm {
-  background-color: #976727 !important;
-}
-
-.mild {
-  background-color: #81785b !important;
-}
-
-.hot {
-  background-color: #782818 !important;
-}
-
-.cold {
-  background-color: #707898 !important;
-}
-
-.arctic {
-  background-color: #74a1cf !important;
-}
-
-.clear-sky {
-  background-color: #408d83 !important;
-}
-
-.broken-clouds {
-  background-color: #157162 !important;
-}
-
-.overcast {
-  background-color: #1b4d46 !important;
-}
-
-.night {
-  background-color: #2f2f2f !important;
-}
-
-.vheavy {
-  background-color: #61207b !important;
-}
-
-.warn {
-  background-color: #a72d2d !important;
-}
-
-.accent-green {
-  background-color: var(--accent-color);
+#days-forecast td.overview-cell,
+#hours-forecast td.overview-cell,
+.overview-cell {
+  background-clip: padding-box !important;
+  -webkit-background-clip: padding-box !important;
 }

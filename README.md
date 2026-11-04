@@ -138,12 +138,12 @@ and then run the generated executable `ll-weather-server`
 - [x] Show weather preview for noon and night (22:00), for astronomy purposes
 - [x] Implement cache size limiting
 - [x] Tests
+- [x] Aggregate data from multiple weather models
 
 #### Planned
 - [ ] Seamless update of data, but cached data for lighting fast initial response
 - [ ] ~~Location and customization in URL for easy bookmarking~~
 - [ ] Dockerized
-- [ ] Aggregate multiple data sources
 - [ ] Weather Map
 
 ## Data Sources
