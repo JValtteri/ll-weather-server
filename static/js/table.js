@@ -1,4 +1,4 @@
-import * as color from "./color.js?id=MTc3MDUxfTU4Nwk";
+import * as color from "./color.js?id=MTc3MDUxfTU4Nwm";
 
 
 /* Function to construct a path to a specific element in JSON
@@ -159,12 +159,12 @@ function addIntOverview(element, day, path, unit='') {
         element.textContent = `${num.toFixed(0)}${unit}`;
         return element;
     }
-    const minv = ov.Min, maxv = ov.Max, avg = ov.Avg;
+    const minv = ov.Min, maxv = ov.Max, median = ov.Median;
     let minDisp = Math.round(minv);
     let maxDisp = Math.round(maxv);
     element.textContent = formatOverviewRange(minDisp, maxDisp, unit);
-    setTooltip(element, `Average: ${avg.toFixed(1)}${unit ? unit.trim() : ''}`);
-    color.applyOverviewGradient(element, {min: minv, max: maxv, avg: avg}, getOverviewPath(day, path), unit);
+    setTooltip(element, `Median: ${median.toFixed(1)}${unit ? unit.trim() : ''}`);
+    color.applyOverviewGradient(element, {min: minv, max: maxv, median: median}, getOverviewPath(day, path), unit);
     return element;
 }
 
@@ -176,10 +176,10 @@ function addNumPerK(element, day, path, unit='') {
     if (isOverview(day, path)) {
         const ov = getOverviewForPath(day, path);
         if (ov) {
-            const minv = ov.Min/1000, maxv = ov.Max/1000, avg = ov.Avg/1000;
+            const minv = ov.Min/1000, maxv = ov.Max/1000, median = ov.Median/1000;
             element.textContent = formatOverviewRange(minv.toFixed(1), maxv.toFixed(1), unit);
-            setTooltip(element, `Average: ${avg.toFixed(1)}${unit ? unit.trim() : ''}`);
-            color.applyOverviewGradient(element, {min: ov.Min, max: ov.Max, avg: ov.Avg}, getOverviewPath(day, path), unit);
+            setTooltip(element, `Median: ${median.toFixed(1)}${unit ? unit.trim() : ''}`);
+            color.applyOverviewGradient(element, {min: ov.Min, max: ov.Max, median: ov.Median}, getOverviewPath(day, path), unit);
             return element;
         }
     }
@@ -202,8 +202,8 @@ function addFloat(element, day, path, unit='') {
         const ov = getOverviewForPath(day, path);
         if (ov) {
             element.textContent = formatOverviewRange(ov.Min.toFixed(1), ov.Max.toFixed(1), unit);
-            setTooltip(element, `Average: ${ov.Avg.toFixed(1)}${unit ? unit.trim() : ''}`);
-            color.applyOverviewGradient(element, {min: ov.Min, max: ov.Max, avg: ov.Avg}, getOverviewPath(day, path), unit);
+            setTooltip(element, `Median: ${ov.Median.toFixed(1)}${unit ? unit.trim() : ''}`);
+            color.applyOverviewGradient(element, {min: ov.Min, max: ov.Max, median: ov.Median}, getOverviewPath(day, path), unit);
             return element;
         }
     }

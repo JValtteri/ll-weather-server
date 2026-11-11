@@ -1,7 +1,7 @@
 import * as cookie from "./cookie.js?id=MTc1NDk1NDIwMA"
 import * as api from "./api.js?id=MTc1ODMxODUzNA"
 import * as util from "./utils.js?id=MTc1ODMxODUzNA"
-import * as table from "./table.js?id=MTc3fTc1Nzgxk"
+import * as table from "./table.js?id=MTc3fTc1Nzgxm"
 
 /*
  * UI elements amd high level UI functions

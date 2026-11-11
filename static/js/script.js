@@ -1,4 +1,4 @@
-import * as ui from "./ui.js?id=MTc1OfMxODUzNAk"
+import * as ui from "./ui.js?id=MTc1OfMxODUzNAm"
 
 const body          = document.getElementById('body');
 

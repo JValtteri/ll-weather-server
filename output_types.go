@@ -8,6 +8,7 @@ import (
     "encoding/json"
     "fmt"
     "log"
+    "sort"
     "time"
 
     "github.com/JValtteri/weather/om"
@@ -45,10 +46,11 @@ type DayHours struct {
 }
 
 type OverviewVals struct {
-    Min   float32
-    Max   float32
-    Avg   float32
-    Count int
+    Min    float32
+    Max    float32
+    Median float32
+    Count  int
+    values []float32
 }
 
 type Overview struct {
@@ -244,7 +246,7 @@ func mapOwmHours(raw_weather owm.WeatherRange, dayIndex int) DayHours {
 
 /* A weatherSource wraps one or more model runs for the same location.
  * Regular forecasts use a single model; overview forecasts aggregate
- * several models and expose their min/max/avg values.
+ * several models and expose their min/max/median values.
  */
 type weatherSource struct {
     ranges       []om.WeatherRange
@@ -386,9 +388,9 @@ func mapOmDays(source weatherSource, city string, lat float32, lon float32) Week
         } else if hour == 15 {
             // Set final day rain
             if source.withOverview {
-                chance, amount := rain.averages()
-                days[dayNo].Day.Rain.Chance = toInt(chance.Avg)
-                days[dayNo].Day.Rain.Amount = amount.Avg
+                chance, amount := rain.medians()
+                days[dayNo].Day.Rain.Chance = toInt(chance.Median)
+                days[dayNo].Day.Rain.Amount = amount.Median
                 if days[dayNo].Day.Overview != nil {
                     days[dayNo].Day.Overview.RainChance = chance
                     days[dayNo].Day.Overview.RainAmount = amount
@@ -462,8 +464,8 @@ func (r *rainAccumulator) current() (int, float32) {
     return r.maxChance[0], r.sum[0]
 }
 
-/* Returns the average rain totals across all models. */
-func (r *rainAccumulator) averages() (OverviewVals, OverviewVals) {
+/* Returns the median rain totals across all models. */
+func (r *rainAccumulator) medians() (OverviewVals, OverviewVals) {
     chance := initOverviewVals()
     amount := initOverviewVals()
     for i := range r.maxChance {
@@ -536,33 +538,33 @@ func aggregateOmAtIndex(r_objs []om.WeatherRange, index int, title string) Weath
             continue
         }
         populateOmData(&wd, &r_objs[i], index, title,
-            toInt(ov.RainChance.Avg), ov.RainAmount.Avg)
+            toInt(ov.RainChance.Median), ov.RainAmount.Median)
         populated = true
         break
     }
     if !populated {
         wd.Title = title
-        wd.Rain.Chance = toInt(ov.RainChance.Avg)
-        wd.Rain.Amount = ov.RainAmount.Avg
+        wd.Rain.Chance = toInt(ov.RainChance.Median)
+        wd.Rain.Amount = ov.RainAmount.Median
     }
-    // Display values are the model averages; min/max live in Overview.
-    wd.Temp.Temp = ov.Temp.Avg
-    wd.Temp.Feels = ov.Feels.Avg
-    wd.Temp.Bulb = ov.Bulb.Avg
-    wd.Uv = ov.Uv.Avg
-    wd.Radiation.Direct = ov.Direct.Avg
-    wd.Radiation.Diffuse = ov.Diffuse.Avg
-    wd.Clouds.Clouds = uint(ov.Clouds.Avg + 0.5)
-    wd.Clouds.Low = uint(ov.CloudsLo.Avg + 0.5)
-    wd.Clouds.Mid = uint(ov.CloudsMed.Avg + 0.5)
-    wd.Clouds.High = uint(ov.CloudsHigh.Avg + 0.5)
-    wd.Pressure = toInt(ov.Pressure.Avg)
-    wd.Humidity = ov.Humidity.Avg
-    wd.Visibility = uint(toInt(ov.Visibility.Avg))
-    wd.Rain.Chance = toInt(ov.RainChance.Avg)
-    wd.Rain.Amount = ov.RainAmount.Avg
-    wd.Wind.Speed = ov.WindSpeed.Avg
-    wd.Wind.Gust = ov.WindGust.Avg
+    // Display values are the model medians; min/max live in Overview.
+    wd.Temp.Temp = ov.Temp.Median
+    wd.Temp.Feels = ov.Feels.Median
+    wd.Temp.Bulb = ov.Bulb.Median
+    wd.Uv = ov.Uv.Median
+    wd.Radiation.Direct = ov.Direct.Median
+    wd.Radiation.Diffuse = ov.Diffuse.Median
+    wd.Clouds.Clouds = uint(ov.Clouds.Median + 0.5)
+    wd.Clouds.Low = uint(ov.CloudsLo.Median + 0.5)
+    wd.Clouds.Mid = uint(ov.CloudsMed.Median + 0.5)
+    wd.Clouds.High = uint(ov.CloudsHigh.Median + 0.5)
+    wd.Pressure = toInt(ov.Pressure.Median)
+    wd.Humidity = ov.Humidity.Median
+    wd.Visibility = uint(toInt(ov.Visibility.Median))
+    wd.Rain.Chance = toInt(ov.RainChance.Median)
+    wd.Rain.Amount = ov.RainAmount.Median
+    wd.Wind.Speed = ov.WindSpeed.Median
+    wd.Wind.Gust = ov.WindGust.Median
     wd.Overview = &ov
     return wd
 }
@@ -728,7 +730,7 @@ func toBool(n int) bool {
 }
 
 func initOverviewVals() OverviewVals {
-    return OverviewVals{Min: 1e12, Max: -1e12, Avg: 0, Count: 0}
+    return OverviewVals{Min: 1e12, Max: -1e12, Median: 0, Count: 0}
 }
 
 func addVal(o *OverviewVals, v float32) {
@@ -743,13 +745,26 @@ func addVal(o *OverviewVals, v float32) {
             o.Max = v
         }
     }
-    o.Avg += v
+    o.values = append(o.values, v)
     o.Count++
+}
+
+func median(values []float32) float32 {
+    if len(values) == 0 {
+        return 0
+    }
+    sorted := append([]float32(nil), values...)
+    sort.Slice(sorted, func(i, j int) bool { return sorted[i] < sorted[j] })
+    mid := len(sorted) / 2
+    if len(sorted)%2 == 0 {
+        return (sorted[mid-1] + sorted[mid]) / 2
+    }
+    return sorted[mid]
 }
 
 func finalizeOverviewVals(o *OverviewVals) {
     if o.Count > 0 {
-        o.Avg = o.Avg / float32(o.Count)
+        o.Median = median(o.values)
     }
 }
 

@@ -165,6 +165,36 @@ func TestSingleModelSourceLength(t *testing.T) {
     }
 }
 
+func TestOverviewMedian(t *testing.T) {
+    tests := []struct {
+        name       string
+        temps      []float32
+        wantMedian float32
+    }{
+        {"odd number of models", []float32{30, 10, 20}, 20},
+        {"even number of models", []float32{40, 10, 30, 20}, 25},
+        {"skewed model values", []float32{10, 10, 10, 30}, 10},
+    }
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            ranges := make([]om.WeatherRange, len(tt.temps))
+            for i, temp := range tt.temps {
+                ranges[i] = testFullRange(72, 72, temp)
+            }
+            wd := aggregateOmAtIndex(ranges, 0, "00:00")
+            if wd.Overview == nil {
+                t.Fatal("Expected overview values")
+            }
+            if got := wd.Overview.Temp.Median; got != tt.wantMedian {
+                t.Errorf("Expected median %v, got %v", tt.wantMedian, got)
+            }
+            if wd.Temp.Temp != tt.wantMedian {
+                t.Errorf("Expected display value %v, got %v", tt.wantMedian, wd.Temp.Temp)
+            }
+        })
+    }
+}
+
 func TestAggregateIgnoresInsufficientModels(t *testing.T) {
     long := testFullRange(72, 72, 10)
     short := testFullRange(72, 24, -50)

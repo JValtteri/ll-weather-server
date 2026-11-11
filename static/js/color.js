@@ -139,12 +139,16 @@ export function applyOverviewGradient(element, range, path, unit='') {
         maxv = tmp;
     }
 
-    // Each end of the gradient uses the same color rules as a regular cell.
-    // A missing color means the default table background should show through.
+    // Each stop of the gradient uses the same color rules as a regular cell.
+    // The ends show the forecast range, while the middle shows the median
+    // forecast. A missing color means the default table background should
+    // show through.
+    const median = range.median;
     const cMin = getColorForValue(minv, path);
+    const cMid = getColorForValue(median, path);
     const cMax = getColorForValue(maxv, path);
 
-    if (!cMin && !cMax) {
+    if (!cMin && !cMid && !cMax) {
         element.style.setProperty('background-color', 'transparent', 'important');
         element.style.setProperty('background-image', 'none', 'important');
         return;
@@ -157,12 +161,14 @@ export function applyOverviewGradient(element, range, path, unit='') {
         return;
     }
 
-    // Use transparent stops for ends without a color so the table background
+    // Use transparent stops for tones without a color so the table background
     // remains visible there instead of being replaced by a fallback color.
     const startColor = cMin || 'transparent';
+    const midColor = cMid || 'transparent';
     const endColor = cMax || 'transparent';
-    element.style.setProperty('background-image', `linear-gradient(90deg, ${startColor}, ${endColor})`, 'important');
-    element.style.setProperty('background-color', cMin && cMax ? cMin : 'transparent', 'important');
+    element.style.setProperty('background-image', `linear-gradient(90deg, ${startColor}, ${midColor}, ${endColor})`, 'important');
+    const hasTransparentStop = !cMin || !cMid || !cMax;
+    element.style.setProperty('background-color', hasTransparentStop ? 'transparent' : cMin, 'important');
     element.style.setProperty('background-size', '100% 100%', 'important');
 }
 
