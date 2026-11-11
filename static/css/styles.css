@@ -95,6 +95,11 @@ button[disabled] {
   background-color: var(--gray-main);
 }
 
+.night {
+  background-color: #2f2f2f !important;
+}
+
+
 .top-ui {
   display: flex;
 }
