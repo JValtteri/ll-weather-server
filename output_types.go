@@ -111,6 +111,10 @@ type WeatherData struct {
 const REFERENCE_TIME uint = 1740096000  // UTC (+0:00)
 const SECONDS_IN_DAY uint = 86400;
 const SECONDS_IN_HOUR uint = 3600;
+/* Models with less than two days of data are too short to contribute to an
+ * aggregated range forecast.
+ */
+const minOverviewForecastHours int = int(2 * (SECONDS_IN_DAY / SECONDS_IN_HOUR));
 var DT_OFFSET int = 0;
 
 /* Converts Posix timestamp and time offset (timezone) to
@@ -252,7 +256,50 @@ func singleModelSource(r om.WeatherRange) weatherSource {
 }
 
 func overviewSource(ranges []om.WeatherRange) weatherSource {
-    return weatherSource{ranges: ranges, withOverview: true}
+    valid := make([]om.WeatherRange, 0, len(ranges))
+    for _, r := range ranges {
+        // Ignore models with missing or too short forecasts instead of
+        // treating their missing values as zero.
+        if usableForecast(r) {
+            valid = append(valid, r)
+        }
+    }
+    return weatherSource{ranges: valid, withOverview: true}
+}
+
+func usableForecast(r om.WeatherRange) bool {
+    return forecastHours(r) >= minOverviewForecastHours
+}
+
+/* Returns the number of hours that contain actual forecast data. Open-Meteo
+ * pads missing data with nulls, which unmarshal to zero. Surface pressure is
+ * never zero, so the first zero marks the end of the forecast. Pressure_msl
+ * is used as a fallback if surface pressure is unavailable.
+ */
+func forecastHours(r om.WeatherRange) int {
+    length := len(r.Hourly.Time)
+    hasPressure := false
+    for _, pressure := range [][]float32{r.Hourly.Surface_pressure, r.Hourly.Pressure_msl} {
+        if len(pressure) == 0 {
+            continue
+        }
+        hasPressure = true
+        limit := len(pressure)
+        if limit > length {
+            limit = length
+        }
+        end := 0
+        for end < limit && pressure[end] != 0 {
+            end++
+        }
+        if end > 0 {
+            return end
+        }
+    }
+    if hasPressure {
+        return 0
+    }
+    return length
 }
 
 func (s weatherSource) empty() bool {
@@ -261,6 +308,29 @@ func (s weatherSource) empty() bool {
 
 func (s weatherSource) reference() *om.WeatherRange {
     return &s.ranges[0]
+}
+
+/* Returns the number of hours to include in the output. An aggregated range
+ * is limited to the shortest forecast of the models that have enough data.
+ */
+func (s weatherSource) length() int {
+    if s.empty() {
+        return 0
+    }
+    length := len(s.ranges[0].Hourly.Time)
+    if s.withOverview {
+        length = forecastHours(s.ranges[0])
+    }
+    for _, r := range s.ranges[1:] {
+        modelLength := len(r.Hourly.Time)
+        if s.withOverview {
+            modelLength = forecastHours(r)
+        }
+        if modelLength < length {
+            length = modelLength
+        }
+    }
+    return length
 }
 
 /* Returns the weather data for a single time slot. Regular forecasts use the
@@ -290,7 +360,8 @@ func mapOmDays(source weatherSource, city string, lat float32, lon float32) Week
     dayNo := 0
     newDay := true
     rain := newRainAccumulator(len(source.ranges))
-    for i := 0; i < len(ref.Hourly.Time); i++ {
+    length := source.length()
+    for i := 0; i < length; i++ {
         dayName, hour := convertTime(ref.Hourly.Time[i])
         // Trim away past days
         if timeInPast(ref.Hourly.Time[i]) {
@@ -376,7 +447,7 @@ func (r *rainAccumulator) reset() {
 
 func (r *rainAccumulator) add(ranges []om.WeatherRange, index int) {
     for i := range r.maxChance {
-        if index >= len(ranges[i].Hourly.Time) {
+        if index >= forecastHours(ranges[i]) {
             continue
         }
         if chance := ranges[i].Hourly.Precipitation_probability[index]; chance > r.maxChance[i] {
@@ -427,7 +498,8 @@ func collectOverview(r_objs []om.WeatherRange, index int) Overview {
         *vals = initOverviewVals()
     }
     for _, r := range r_objs {
-        if index >= len(r.Hourly.Time) {
+        length := forecastHours(r)
+        if length < minOverviewForecastHours || index >= length {
             continue
         }
         h := &r.Hourly
@@ -456,11 +528,19 @@ func collectOverview(r_objs []om.WeatherRange, index int) Overview {
 func aggregateOmAtIndex(r_objs []om.WeatherRange, index int, title string) WeatherData {
     ov := collectOverview(r_objs, index)
     var wd WeatherData
-    // Pick scalar values (icon, wind direction, sun) from the first model.
-    if len(r_objs) > 0 && index < len(r_objs[0].Hourly.Time) {
-        populateOmData(&wd, &r_objs[0], index, title,
+    // Pick scalar values (icon, wind direction, sun) from the first usable model.
+    populated := false
+    for i := range r_objs {
+        length := forecastHours(r_objs[i])
+        if length < minOverviewForecastHours || index >= length {
+            continue
+        }
+        populateOmData(&wd, &r_objs[i], index, title,
             toInt(ov.RainChance.Avg), ov.RainAmount.Avg)
-    } else {
+        populated = true
+        break
+    }
+    if !populated {
         wd.Title = title
         wd.Rain.Chance = toInt(ov.RainChance.Avg)
         wd.Rain.Amount = ov.RainAmount.Avg
@@ -496,7 +576,8 @@ func mapOmHours(source weatherSource, dayIndex int) DayHours {
     ref := source.reference()
     dayNo := 0
     hours := make([]WeatherData, 0, 24)
-    for i := 0; i < len(ref.Hourly.Time); i++ {
+    length := source.length()
+    for i := 0; i < length; i++ {
         _, hour := convertTime(ref.Hourly.Time[i])
         // Trim away past hours
         if timeInPast(ref.Hourly.Time[i]) {
